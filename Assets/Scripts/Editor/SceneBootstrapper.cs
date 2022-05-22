@@ -12,8 +12,8 @@ namespace Pantheon.Editor
         private const string _previousSceneKey = "Pantheon/PreviousScene";
         private const string _loadBootstrapSceneKey = "Pantheon/LoadBootstrapScene";
 
-        private const string _loadBootstrapSceneOnPlay = "Pantheon/Load Bootstrap Scene On Play";
-        private const string _doNotLoadBootstrapSceneOnPlay = "Pantheon/Don't Load Bootstrap Scene On Play";
+        private const string _loadBootstrapSceneOnPlay = "Pantheon/Load bootstrap scene on play";
+        private const string _doNotLoadBootstrapSceneOnPlay = "Pantheon/Don't load bootstrap scene on play";
 
         private static bool _stoppingAndStarting;
 

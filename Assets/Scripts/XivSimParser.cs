@@ -5,6 +5,7 @@ using System.ComponentModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
+using Newtonsoft.Json.UnityConverters.Math;
 
 namespace Pantheon
 {
@@ -20,7 +21,7 @@ namespace Pantheon
 
             [DefaultValue(130000)]
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-            public float defaultHealth;
+            public int defaultHealth = 130000;
         }
 
         public abstract class MechanicEvent { }
@@ -33,14 +34,16 @@ namespace Pantheon
 
             [DefaultValue(CollisionShape.Unspecified)]
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-            public CollisionShape collisionShape;
+            public CollisionShape collisionShape = CollisionShape.Unspecified;
 
+            [JsonConverter(typeof(Vector4Converter))]
             public Vector4 collisionShapeParams;
+
             public string colorHtml;
 
             [DefaultValue(true)]
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-            public bool visible;
+            public bool visible = true;
 
             public float persistentTickInterval;
             public float persistentActivationDelay;
@@ -61,7 +64,7 @@ namespace Pantheon
 
             [DefaultValue(1)]
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-            public int numberToSpawn;
+            public int numberToSpawn = 1;
         }
 
         public class SpawnEnemy : MechanicEvent
@@ -78,17 +81,27 @@ namespace Pantheon
             public bool isTargetable;
             public bool showInEnemyList;
             public bool isVisible;
+
+            [JsonConverter(typeof(Vector3Converter))]
             public Vector3 visualPosition;
+
+            [JsonConverter(typeof(Vector3Converter))]
             public Vector3 visualScale;
+
             public string referenceMechanicName;
             public string deathMechanicName;
+
+            [JsonConverter(typeof(Vector2Converter))]
             public Vector2 position;
         }
 
         public class SpawnMechanicEvent : MechanicEvent
         {
             public string referenceMechanicName;
+            
+            [JsonConverter(typeof(Vector2Converter))]
             public Vector2 position;
+
             public float rotation;
             public bool isPositionRelative;
             public bool isRotationRelative;
@@ -104,7 +117,7 @@ namespace Pantheon
 
             [DefaultValue("#000000")]
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-            public string colorHtml;
+            public string colorHtml = "#000000";
 
             public bool spawnOnPlayer;
             public bool isRotationRelative;
@@ -130,7 +143,10 @@ namespace Pantheon
         {
             public TargetingScheme targetingScheme;
             public string referenceMechanicName;
+
+            [JsonConverter(typeof(Vector2Converter))]
             public Vector2 position;
+
             public float rotation;
             public bool isPositionRelative;
             public bool isRotationRelative;
@@ -142,7 +158,7 @@ namespace Pantheon
         {
             [DefaultValue(true)]
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-            public bool affectLivingOnly;
+            public bool affectLivingOnly = true;
 
             public MechanicEffect effect;
             public List<MechanicEffect> effects;
@@ -161,7 +177,7 @@ namespace Pantheon
 
             [DefaultValue(1)]
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-            public int maxStackAmount;
+            public int maxStackAmount = 1;
         }
 
         public abstract class TargetingScheme
@@ -174,7 +190,7 @@ namespace Pantheon
 
             [DefaultValue(true)]
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-            public bool targetLivingOnly;
+            public bool targetLivingOnly = true;
         }
 
         public class TargetSpecificPlayerIds : TargetingScheme
@@ -195,7 +211,7 @@ namespace Pantheon
 
         public abstract class Condition { }
 
-        private class TypeBinder : ISerializationBinder
+        public class TypeBinder : ISerializationBinder
         {
             public Type BindToType(string assemblyName, string typeName)
             {
