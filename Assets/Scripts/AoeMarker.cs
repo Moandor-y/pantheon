@@ -5,16 +5,37 @@ using System;
 
 namespace Pantheon {
   public class AoeMarker : MonoBehaviour {
-    public float Angle = 360;
-    public float Opacity = 0;
-    public float Duration;
-    public float Radius;
+    public float Angle {
+      get { return _material.GetFloat("_Angle"); }
+
+      set { _material.SetFloat("_Angle", value); }
+    }
+
+    public Color TintColor {
+      get { return _material.GetColor("_Color"); }
+
+      set { _material.SetColor("_Color", value); }
+    }
+
+    public float Radius {
+      get { return _projector.orthographicSize / 2; }
+
+      set { _projector.orthographicSize = value * 2; }
+    }
+
+    public float InnerRadius {
+      get { return _material.GetFloat("_InnerRadius") * Radius; }
+
+      set { _material.SetFloat("_InnerRadius", value / Radius); }
+    }
 
     public bool Visible {
       get { return _projector.gameObject.activeSelf; }
 
       set { _projector.gameObject.SetActive(value); }
     }
+
+    public float Duration;
 
     [SerializeField]
     private Projector _projector;
@@ -25,7 +46,8 @@ namespace Pantheon {
     private Material _material;
 
     private float _prevAngle;
-    private float _prevOpacity = 1;
+    private float _prevOpacity = -1;
+    private float _prevInnerRadius = -1;
 
     private void Awake() {
       _material = new Material(_projector.material);
@@ -69,20 +91,6 @@ namespace Pantheon {
     }
 
     private void UpdateProperties() {
-      if (Angle != _prevAngle) {
-        _material.SetFloat("_Angle", Angle);
-        _prevAngle = Angle;
-      }
-
-      if (Opacity != _prevOpacity) {
-        var color = _material.GetColor("_Color");
-        color.a = Opacity;
-        _material.SetColor("_Color", color);
-        _prevOpacity = Opacity;
-      }
-
-      _projector.orthographicSize = 2 * Radius;
-
       Vector3 eular = _projector.transform.localRotation.eulerAngles;
       eular.y = 180 - Angle / 2;
       _projector.transform.localRotation = Quaternion.Euler(eular);

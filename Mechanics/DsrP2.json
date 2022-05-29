@@ -12,7 +12,7 @@
         "$type": "SpawnEnemy",
         "enemyName": "King Thordan",
         "textureFilePath": "Mechanics/Resources/Thordan.png",
-        "colorHtml": "#8b4800",
+        "colorHtml": "#000000",
         "maxHp": 1000000,
         "baseMoveSpeed": 2.0,
         "hitboxSize": 3.0,
@@ -34,10 +34,6 @@
       "mechanic": {
         "$type": "ExecuteMultipleEvents",
         "events": [
-          {
-            "$type": "WaitEvent",
-            "timeToWait": 8.433333
-          },
           {
             "$type": "SpawnMechanicEvent",
             "referenceMechanicName": "AscalonsMercyConcealed"
@@ -79,6 +75,7 @@
         "z": 0.0,
         "w": 0.0
       },
+      "colorHtml": "#ff0000",
       "visible": false,
       "mechanic": {
         "$type": "ExecuteMultipleEvents",

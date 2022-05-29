@@ -100,13 +100,16 @@ namespace Pantheon {
 
       float radius = 0;
       float angle = 0;
+      float innerRadius = 0;
       if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
-        radius = mechanicProperties.collisionShapeParams.GetValueOrDefault().x;
-        angle = mechanicProperties.collisionShapeParams.GetValueOrDefault().y;
+        Vector4 shapeParams = mechanicProperties.collisionShapeParams.GetValueOrDefault();
+        radius = shapeParams.x;
+        angle = shapeParams.y;
+        innerRadius = shapeParams.z;
       }
       SpawnAoeMarkerClientRpc(
           new Vector3(mechanicContext.Position.x, 0, mechanicContext.Position.y), duration, radius,
-          angle, visible, aoeMarkerId.ToByteArray());
+          innerRadius, angle, visible, aoeMarkerId.ToByteArray());
 
       MechanicContext childContext = InheritContext(mechanicContext);
       childContext.Visible &= visible;
@@ -178,7 +181,7 @@ namespace Pantheon {
       enemy.SetNameServerRpc(spawnEnemy.enemyName);
 
       MechanicContext childContext = InheritContext(mechanicContext);
-      childContext.SourceId = enemyId;
+      childContext.Source = enemy;
       yield return Execute(
           _mechanicData.referenceMechanicProperties[spawnEnemy.referenceMechanicName],
           childContext);
@@ -186,8 +189,7 @@ namespace Pantheon {
 
     private IEnumerator Execute(XivSimParser.StartCastBar startCastBar,
                                 MechanicContext mechanicContext) {
-      EnemyController source = GlobalContext.Instance.GetEnemyById(mechanicContext.SourceId);
-      source.Cast(startCastBar.castName, startCastBar.duration);
+      mechanicContext.Source.Cast(startCastBar.castName, startCastBar.duration);
       yield break;
     }
 
@@ -303,11 +305,12 @@ namespace Pantheon {
 
     [ClientRpc]
     private void SpawnAoeMarkerClientRpc(Vector3 position, float duration, float radius,
-                                         float angle, bool visible, byte[] id) {
+                                         float innerRadius, float angle, bool visible, byte[] id) {
       AoeMarker aoeMarker = Instantiate(_aoeMarkerPrefab).GetComponent<AoeMarker>();
       aoeMarker.transform.position = position;
       aoeMarker.Duration = duration;
       aoeMarker.Radius = radius;
+      aoeMarker.InnerRadius = innerRadius;
       aoeMarker.Angle = angle;
       aoeMarker.Visible = visible;
       _aoeMarkers[new Guid(id)] = aoeMarker;
@@ -326,7 +329,7 @@ namespace Pantheon {
       return new MechanicContext() {
         Parent = parent,
         Visible = parent.Visible,
-        SourceId = parent.SourceId,
+        Source = parent.Source,
         Position = parent.Position,
         Collision = parent.Collision,
         Target = parent.Target,
@@ -338,12 +341,12 @@ namespace Pantheon {
     private class MechanicContext {
       public MechanicContext Parent;
       public bool Visible = true;
-      public int SourceId;
+      public EnemyController Source;
       public Vector2 Position;
       public ICollision Collision;
       public NetworkPlayer Target;
       public bool IsTargeted;
-      public Vector2 Forward;
+      public Vector2 Forward = new Vector2(0, 1);
     }
 
     private interface ICollision {

@@ -5,8 +5,8 @@
 Shader "Projector/AdditiveTint" {
   Properties {
     _Color ("Tint Color", Color) = (1, 1, 1, 1)
-    _ShadowTex ("Cookie", 2D) = "gray" {}
     _Angle ("Angle", Range(0, 360)) = 0
+    _InnerRadius("Inner Radius", Range(0, 0.5)) = 0
   }
   Subshader {
     Tags {"Queue"="Transparent"}
@@ -19,12 +19,11 @@ Shader "Projector/AdditiveTint" {
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment frag
-      #pragma enable_d3d11_debug_symbols
 
       #include "UnityCG.cginc"
       
       struct v2f {
-        float4 uvShadow : TEXCOORD0;
+        float2 uv: TEXCOORD0;
         float4 pos : SV_POSITION;
       };
       
@@ -34,20 +33,21 @@ Shader "Projector/AdditiveTint" {
       {
         v2f o;
         o.pos = UnityObjectToClipPos (vertex);
-        o.uvShadow = mul (unity_Projector, vertex);
+        o.uv = mul (unity_Projector, vertex);
         return o;
       }
       
-      sampler2D _ShadowTex;
       fixed4 _Color;
       float _Angle;
+      float _InnerRadius;
       
       fixed4 frag (v2f i) : SV_Target
       {
-        fixed4 texCookie = tex2Dproj (_ShadowTex, UNITY_PROJ_COORD(i.uvShadow));
-        fixed4 outColor = _Color * texCookie.a;
-        float angle = degrees(atan2(i.uvShadow.x - 0.5, i.uvShadow.y - 0.5)) + 180;
-        return outColor * (angle < _Angle);
+        fixed4 outColor = _Color;
+        float2 uv = i.uv - float2(0.5, 0.5);
+        float angle = degrees(atan2(uv.x, uv.y)) + 180;
+        float magnitude = length(uv);
+        return outColor * (angle < _Angle) * (_InnerRadius < magnitude) * (magnitude < 0.5);
       }
       ENDCG
     }

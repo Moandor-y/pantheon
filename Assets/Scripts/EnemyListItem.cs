@@ -18,7 +18,7 @@ namespace Pantheon {
     [SerializeField]
     private ProgressBar _castBar;
 
-    private void Start() {
+    private void Awake() {
       _castName.gameObject.SetActive(false);
       _castBar.gameObject.SetActive(false);
     }

@@ -35,7 +35,7 @@ namespace Pantheon.Mechanics {
             new SpawnEnemy() {
               enemyName = "King Thordan",
               textureFilePath = "Mechanics/Resources/Thordan.png",
-              colorHtml = "#8b4800",
+              colorHtml = "#000000",
               maxHp = 1000000,
               baseMoveSpeed = 2,
               hitboxSize = 3,
@@ -51,9 +51,9 @@ namespace Pantheon.Mechanics {
             new ExecuteMultipleEvents() {
               events =
                   new List<MechanicEvent>() {
-                    new WaitEvent() {
-                      timeToWait = 8.4333333333333333333333333333333f,
-                    },
+                    // new WaitEvent() {
+                    //   timeToWait = 8.4333333333333333333333333333333f,
+                    // },
                     new SpawnMechanicEvent() {
                       referenceMechanicName = _ascalonsMercyConcealed,
                     },
@@ -87,6 +87,7 @@ namespace Pantheon.Mechanics {
             followSpeed = 0,
             collisionShape = CollisionShape.Round,
             collisionShapeParams = new Vector4(100, 24, 0, 0),
+            colorHtml = "#ff0000",
             mechanic =
                 new ExecuteMultipleEvents() {
                   events =
