@@ -24,25 +24,19 @@ namespace Pantheon {
     public abstract class MechanicEvent {}
 
     public class MechanicProperties {
-      public bool isTerrain;
-      public bool isTargeted;
-      public float followSpeed;
-
-      [DefaultValue(CollisionShape.Unspecified)]
-      [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-      public CollisionShape collisionShape = CollisionShape.Unspecified;
+      public bool? isTerrain;
+      public bool? isTargeted;
+      public float? followSpeed;
+      public CollisionShape? collisionShape;
 
       [JsonConverter(typeof(Vector4Converter))]
-      public Vector4 collisionShapeParams;
+      public Vector4? collisionShapeParams;
 
       public string colorHtml;
 
-      [DefaultValue(true)]
-      [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-      public bool visible = true;
-
-      public float persistentTickInterval;
-      public float persistentActivationDelay;
+      public bool? visible;
+      public float? persistentTickInterval;
+      public float? persistentActivationDelay;
       public MechanicEvent mechanic;
       public MechanicEvent persistentMechanic;
       public List<int> staticTargetIds;
@@ -154,6 +148,10 @@ namespace Pantheon {
       public List<MechanicEffect> failedConditionEffects;
     }
 
+    public class ModifyMechanicEvent : MechanicEvent {
+      public string referenceMechanicName;
+    }
+
     public abstract class MechanicEffect {}
 
     public class DamageEffect : MechanicEffect {
@@ -182,9 +180,11 @@ namespace Pantheon {
       public List<int> targetIds;
     }
 
+    public class TargetAllPlayers : TargetingScheme {}
+
     public class TetherProperties {}
 
-    public enum CollisionShape { Unspecified, Round, Rectangle }
+    public enum CollisionShape { Round, Rectangle }
 
     public class StatusEffectData {}
 

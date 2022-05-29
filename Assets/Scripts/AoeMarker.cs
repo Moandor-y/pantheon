@@ -10,6 +10,12 @@ namespace Pantheon {
     public float Duration;
     public float Radius;
 
+    public bool Visible {
+      get { return _projector.gameObject.activeSelf; }
+
+      set { _projector.gameObject.SetActive(value); }
+    }
+
     [SerializeField]
     private Projector _projector;
 
@@ -76,6 +82,10 @@ namespace Pantheon {
       }
 
       _projector.orthographicSize = 2 * Radius;
+
+      Vector3 eular = _projector.transform.localRotation.eulerAngles;
+      eular.y = 180 - Angle / 2;
+      _projector.transform.localRotation = Quaternion.Euler(eular);
     }
   }
 }

@@ -20,7 +20,8 @@ namespace Pantheon {
 
     private int _nextEnemyId = 1;
     private MersenneTwister _random;
-    private List<NetworkPlayer> _players;
+    private List<NetworkPlayer> _players = new List<NetworkPlayer>();
+    private Dictionary<Guid, AoeMarker> _aoeMarkers = new Dictionary<Guid, AoeMarker>();
 
     private List<Coroutine> _coroutines = new List<Coroutine>();
 
@@ -39,11 +40,11 @@ namespace Pantheon {
     }
 
     private IEnumerator Execute(XivSimParser.MechanicData mechanicData) {
-      if (_mechanicData != null || _players != null) {
+      if (_mechanicData != null || _players.Count != 0 || _aoeMarkers.Count != 0) {
         throw new InvalidOperationException();
       }
       _mechanicData = mechanicData;
-      _players = new List<NetworkPlayer>(GlobalContext.Instance.Players);
+      _players.AddRange(GlobalContext.Instance.Players);
 
       foreach (NetworkPlayer player in _players) {
         player.MaxHealth = Mathf.RoundToInt(_mechanicData.defaultHealth);
@@ -61,7 +62,8 @@ namespace Pantheon {
       }
       _mechanicData = null;
       _random = null;
-      _players = null;
+      _players.Clear();
+      _aoeMarkers.Clear();
     }
 
     private IEnumerator Execute(XivSimParser.MechanicEvent mechanicEvent,
@@ -81,49 +83,68 @@ namespace Pantheon {
 
     private IEnumerator Execute(XivSimParser.SpawnMechanicEvent spawnMechanicEvent,
                                 MechanicContext mechanicContext) {
+      MechanicContext childContext = InheritContext(mechanicContext);
+      childContext.Position += spawnMechanicEvent.position;
       _coroutines.Add(StartCoroutine(Execute(
           _mechanicData.referenceMechanicProperties[spawnMechanicEvent.referenceMechanicName],
-          new MechanicContext() {
-            Parent = mechanicContext,
-            Visible = mechanicContext.Visible,
-            SourceId = mechanicContext.SourceId,
-            Position = mechanicContext.Position + spawnMechanicEvent.position,
-            Collision = mechanicContext.Collision,
-          })));
+          childContext)));
       yield break;
     }
 
     private IEnumerator Execute(XivSimParser.MechanicProperties mechanicProperties,
                                 MechanicContext mechanicContext) {
-      if (mechanicProperties.visible) {
-        float radius;
-        float angle;
-        if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
-          radius = mechanicProperties.collisionShapeParams.x;
-          angle = mechanicProperties.collisionShapeParams.y;
-        } else {
-          throw new NotImplementedException();
-        }
-        SpawnAoeMarkerClientRpc(
-            position: new Vector3(mechanicContext.Position.x, 0, mechanicContext.Position.y),
-            duration: GetDuration(mechanicProperties.mechanic), radius: radius, angle: angle);
-      }
+      float duration = GetDuration(mechanicProperties.mechanic);
+      Guid aoeMarkerId = Guid.NewGuid();
 
-      ICollision collision = mechanicContext.Collision;
+      bool visible = mechanicProperties.visible.GetValueOrDefault();
+
+      float radius = 0;
+      float angle = 0;
       if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
-        collision =
-            new RoundCollision(mechanicContext.Position, mechanicProperties.collisionShapeParams.x);
+        radius = mechanicProperties.collisionShapeParams.GetValueOrDefault().x;
+        angle = mechanicProperties.collisionShapeParams.GetValueOrDefault().y;
       }
+      SpawnAoeMarkerClientRpc(
+          new Vector3(mechanicContext.Position.x, 0, mechanicContext.Position.y), duration, radius,
+          angle, visible, aoeMarkerId.ToByteArray());
 
-      _coroutines.Add(StartCoroutine(Execute(mechanicProperties.mechanic, new MechanicContext() {
-        Parent = mechanicContext,
-        Visible = mechanicContext.Visible && mechanicProperties.visible,
-        SourceId = mechanicContext.SourceId,
-        Position = mechanicContext.Position,
-        Collision = collision,
-      })));
+      MechanicContext childContext = InheritContext(mechanicContext);
+      childContext.Visible &= visible;
+      childContext.IsTargeted = mechanicProperties.isTargeted.GetValueOrDefault();
+      _coroutines.Add(StartCoroutine(Execute(mechanicProperties.mechanic, childContext)));
 
-      yield break;
+      float endTime = Time.time + duration;
+
+      while (Time.time < endTime) {
+        if (childContext.IsTargeted) {
+          Vector2 targetPosition = new Vector2(mechanicContext.Target.transform.position.x,
+                                               mechanicContext.Target.transform.position.z);
+          Vector2 diff = targetPosition - childContext.Position;
+
+          float movement = Mathf.Min(
+              diff.magnitude, mechanicProperties.followSpeed.GetValueOrDefault() * Time.deltaTime);
+          childContext.Position += diff.normalized * movement;
+
+          if (diff == Vector2.zero) {
+            mechanicContext.Forward = new Vector2(0, 1);
+          } else {
+            mechanicContext.Forward = diff.normalized;
+          }
+        }
+
+        UpdateAoeMarkerClientRpc(new Vector3(childContext.Position.x, 0, childContext.Position.y),
+                                 Quaternion.LookRotation(new Vector3(mechanicContext.Forward.x, 0,
+                                                                     mechanicContext.Forward.y)),
+                                 childContext.Visible, aoeMarkerId.ToByteArray());
+
+        if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
+          Vector4 shapeParams = mechanicProperties.collisionShapeParams.GetValueOrDefault();
+          childContext.Collision = new RoundCollision(
+              mechanicContext.Position, mechanicContext.Forward, shapeParams.x, shapeParams.y);
+        }
+
+        yield return null;
+      }
     }
 
     private IEnumerator Execute(XivSimParser.ExecuteMultipleEvents executeMultipleEvents,
@@ -156,14 +177,11 @@ namespace Pantheon {
       enemy.SetTexturePathServerRpc(spawnEnemy.textureFilePath);
       enemy.SetNameServerRpc(spawnEnemy.enemyName);
 
+      MechanicContext childContext = InheritContext(mechanicContext);
+      childContext.SourceId = enemyId;
       yield return Execute(
           _mechanicData.referenceMechanicProperties[spawnEnemy.referenceMechanicName],
-          new MechanicContext() {
-            Parent = mechanicContext,
-            Visible = mechanicContext.Visible,
-            SourceId = enemyId,
-            Position = mechanicContext.Position,
-          });
+          childContext);
     }
 
     private IEnumerator Execute(XivSimParser.StartCastBar startCastBar,
@@ -192,15 +210,11 @@ namespace Pantheon {
                                 MechanicContext mechanicContext) {
       List<NetworkPlayer> targets = TargetPlayers(spawnTargetedEvents.targetingScheme);
       foreach (NetworkPlayer target in targets) {
+        MechanicContext childContext = InheritContext(mechanicContext);
+        childContext.Target = target;
         _coroutines.Add(StartCoroutine(Execute(
             _mechanicData.referenceMechanicProperties[spawnTargetedEvents.referenceMechanicName],
-            new MechanicContext() {
-              Parent = mechanicContext,
-              Visible = mechanicContext.Visible,
-              SourceId = mechanicContext.SourceId,
-              Position = new Vector2(target.transform.position.x, target.transform.position.z),
-              Collision = mechanicContext.Collision,
-            })));
+            childContext)));
       }
       yield break;
     }
@@ -215,6 +229,19 @@ namespace Pantheon {
         }
       }
       ApplyEffect(applyEffectToPlayers.effect, hit);
+      yield break;
+    }
+
+    private IEnumerator Execute(XivSimParser.ModifyMechanicEvent modifyMechanicEvent,
+                                MechanicContext mechanicContext) {
+      XivSimParser.MechanicProperties mechanicProperties =
+          _mechanicData.referenceMechanicProperties[modifyMechanicEvent.referenceMechanicName];
+      if (mechanicProperties.isTargeted.HasValue) {
+        mechanicContext.IsTargeted = mechanicProperties.isTargeted.Value;
+      }
+      if (mechanicProperties.visible.HasValue) {
+        mechanicContext.Visible = mechanicProperties.visible.Value;
+      }
       yield break;
     }
 
@@ -236,6 +263,10 @@ namespace Pantheon {
         foreach (int id in targetSpecificPlayerIds.targetIds) {
           result.Add(_players[id % _players.Count]);
         }
+      } else if (targetingScheme is XivSimParser.TargetAllPlayers) {
+        result.AddRange(_players);
+      } else {
+        throw new NotImplementedException();
       }
       return result;
     }
@@ -272,12 +303,36 @@ namespace Pantheon {
 
     [ClientRpc]
     private void SpawnAoeMarkerClientRpc(Vector3 position, float duration, float radius,
-                                         float angle) {
+                                         float angle, bool visible, byte[] id) {
       AoeMarker aoeMarker = Instantiate(_aoeMarkerPrefab).GetComponent<AoeMarker>();
       aoeMarker.transform.position = position;
       aoeMarker.Duration = duration;
       aoeMarker.Radius = radius;
       aoeMarker.Angle = angle;
+      aoeMarker.Visible = visible;
+      _aoeMarkers[new Guid(id)] = aoeMarker;
+    }
+
+    [ClientRpc]
+    private void UpdateAoeMarkerClientRpc(Vector3 position, Quaternion rotation, bool visible,
+                                          byte[] id) {
+      var aoeMarker = _aoeMarkers[new Guid(id)];
+      aoeMarker.transform.position = position;
+      aoeMarker.transform.rotation = rotation;
+      aoeMarker.Visible = visible;
+    }
+
+    private static MechanicContext InheritContext(MechanicContext parent) {
+      return new MechanicContext() {
+        Parent = parent,
+        Visible = parent.Visible,
+        SourceId = parent.SourceId,
+        Position = parent.Position,
+        Collision = parent.Collision,
+        Target = parent.Target,
+        IsTargeted = parent.IsTargeted,
+        Forward = parent.Forward,
+      };
     }
 
     private class MechanicContext {
@@ -286,6 +341,9 @@ namespace Pantheon {
       public int SourceId;
       public Vector2 Position;
       public ICollision Collision;
+      public NetworkPlayer Target;
+      public bool IsTargeted;
+      public Vector2 Forward;
     }
 
     private interface ICollision {
@@ -294,15 +352,22 @@ namespace Pantheon {
 
     private class RoundCollision : ICollision {
       private Vector2 _position;
+      private Vector2 _direction;
       private float _maxRange;
+      private float _angle;
 
-      public RoundCollision(Vector2 position, float maxRange) {
+      public RoundCollision(Vector2 position, Vector2 direction, float maxRange, float angle) {
         _position = position;
+        _direction = direction;
         _maxRange = maxRange;
+        _angle = angle;
       }
 
       public bool CollidesWith(Vector2 position) {
-        return Vector2.Distance(position, _position) < _maxRange;
+        Vector2 diff = position - _position;
+        bool distance = diff.magnitude < _maxRange;
+        bool angle = (diff == Vector2.zero) || Vector2.Angle(diff, _direction) < _angle / 2;
+        return distance && angle;
       }
     }
   }

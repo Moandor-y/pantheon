@@ -1,0 +1,147 @@
+{
+  "referenceMechanicProperties": {
+    "MechanicVisible": {
+      "visible": true
+    },
+    "MechanicNonTargeted": {
+      "isTargeted": false
+    },
+    "SpawnThordan": {
+      "visible": false,
+      "mechanic": {
+        "$type": "SpawnEnemy",
+        "enemyName": "King Thordan",
+        "textureFilePath": "Mechanics/Resources/Thordan.png",
+        "colorHtml": "#8b4800",
+        "maxHp": 1000000,
+        "baseMoveSpeed": 2.0,
+        "hitboxSize": 3.0,
+        "isTargetable": true,
+        "visualPosition": {
+          "x": 0.0,
+          "y": 2.0,
+          "z": 0.0
+        },
+        "visualScale": {
+          "x": 4.0,
+          "y": 4.0,
+          "z": 4.0
+        },
+        "referenceMechanicName": "ThordanMechanics"
+      }
+    },
+    "ThordanMechanics": {
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 8.433333
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "AscalonsMercyConcealed"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": "Infinity"
+          }
+        ]
+      }
+    },
+    "AscalonsMercyConcealed": {
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "StartCastBar",
+            "castName": "Ascalon's Mercy Concealed",
+            "duration": 2.6833334
+          },
+          {
+            "$type": "SpawnTargetedEvents",
+            "targetingScheme": {
+              "$type": "TargetAllPlayers",
+              "targetLivingOnly": true
+            },
+            "referenceMechanicName": "AscalonsMercyConcealedTargeted"
+          }
+        ]
+      }
+    },
+    "AscalonsMercyConcealedTargeted": {
+      "isTargeted": true,
+      "followSpeed": 0.0,
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 100.0,
+        "y": 24.0,
+        "z": 0.0,
+        "w": 0.0
+      },
+      "visible": false,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 2.6833334
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "MechanicNonTargeted"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.88333333
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "MechanicVisible"
+          },
+          {
+            "$type": "ApplyEffectToPlayers",
+            "affectLivingOnly": true,
+            "effect": {
+              "$type": "DamageEffect",
+              "damageAmount": 100000.0,
+              "maxStackAmount": 1
+            }
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 0.8
+          }
+        ]
+      }
+    }
+  },
+  "mechanicEvents": [
+    {
+      "$type": "SpawnVisualObject",
+      "textureFilePath": "Mechanics/Resources/ArenaCircle.png",
+      "relativePosition": {
+        "x": 0.0,
+        "y": -0.001,
+        "z": 0.0
+      },
+      "eulerAngles": {
+        "x": 90.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 46.83,
+        "y": 46.83,
+        "z": 1.0
+      },
+      "colorHtml": "#000000",
+      "visualDuration": "Infinity"
+    },
+    {
+      "$type": "SpawnMechanicEvent",
+      "referenceMechanicName": "SpawnThordan"
+    }
+  ],
+  "defaultHealth": 130000
+}
