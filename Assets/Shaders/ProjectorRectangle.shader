@@ -1,12 +1,9 @@
-// Upgrade NOTE: replaced '_Projector' with 'unity_Projector'
-// Upgrade NOTE: replaced '_ProjectorClip' with 'unity_ProjectorClip'
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Projector/AdditiveTint" {
+Shader "Projector/Rectangle"
+{
   Properties {
     _Color ("Tint Color", Color) = (1, 1, 1, 1)
-    _Angle ("Angle", Range(0, 360)) = 0
-    _InnerRadius("Inner Radius", Range(0, 0.5)) = 0
+    _Width ("Width", Float) = 1
+    _Length ("Length", Float) = 1
   }
   Subshader {
     Tags {"Queue"="Transparent"}
@@ -38,16 +35,14 @@ Shader "Projector/AdditiveTint" {
       }
       
       fixed4 _Color;
-      float _Angle;
-      float _InnerRadius;
+      float _Width;
+      float _Length;
       
       fixed4 frag (v2f i) : SV_Target
       {
         fixed4 outColor = _Color;
         float2 uv = i.uv - float2(0.5, 0.5);
-        float angle = degrees(atan2(uv.x, uv.y)) + 180;
-        float magnitude = length(uv);
-        return outColor * (angle < _Angle) * (_InnerRadius < magnitude) * (magnitude < 0.5);
+        return outColor * (-_Width / 2 < uv.x) * (uv.x < _Width / 2) * (0 < uv.y) * (uv.y < _Length);
       }
       ENDCG
     }

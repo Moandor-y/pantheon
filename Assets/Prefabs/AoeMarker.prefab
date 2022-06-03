@@ -46,12 +46,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 710f193cd0392b54e857150e91367e96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Angle: 360
-  Opacity: 0
   Duration: 0
-  Radius: 0
   _projector: {fileID: 962144124117468908}
   _animator: {fileID: 962144123672103950}
+  _roundMaterial: {fileID: 2100000, guid: 583c63c1293eabd4b958c86af37352d1, type: 2}
+  _rectangleMaterial: {fileID: 2100000, guid: fb40dde3a92c87e43ab536cfffb20fae, type: 2}
 --- !u!95 &962144123672103950
 Animator:
   serializedVersion: 4

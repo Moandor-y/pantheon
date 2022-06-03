@@ -9,14 +9,28 @@ namespace Pantheon.Mechanics {
     private const string _mechanicVisible = "MechanicVisible";
     private const string _mechanicNonTargeted = "MechanicNonTargeted";
 
+    private const float _arenaRadius = 46.83f / 2;
+
     private const string _spawnThordan = "SpawnThordan";
     private const string _thordanMechanics = "ThordanMechanics";
 
     private const string _ascalonsMercyConcealed = "AscalonsMercyConcealed";
     private const string _ascalonsMercyConcealedTargeted = "AscalonsMercyConcealedTargeted";
-
     private const float _ascalonsMercyConcealedCastDuration = 2.6833333333333333333333333333333f;
     private const float _ascalonsMercyConcealedDamageDelay = 1.8833333333333333333333333333333f;
+
+    private const string _strengthOfTheWard = "StrengthOfTheWard";
+    private const string _strengthOfTheWardHeavyImpact = "StrengthOfTheWardHeavyImpact";
+    private const string _strengthOfTheWardHeavyImpactDamage = "StrengthOfTheWardHeavyImpactDamage";
+    private const float _strengthOfTheWardCastDuration = 3.6833333333333333333333333333333f;
+    private const float _strengthOfTheWardHeavyImpactRadius = _arenaRadius / 6.5f;
+    private const float _strengthOfTheWardHeavyImpactPosition =
+        _strengthOfTheWardHeavyImpactRadius * 1.1f;
+    private const float _strengthOfTheWardHeavyImpactBeforeStart =
+        6.9666666666666666666666666666667f;
+    private const float _strengthOfTheWardHeavyImpactCastDuration = 5.7f;
+    private const float _strengthOfTheWardHeavyImpactDamageInterval =
+        1.8166666666666666666666666666667f;
 
     public static MechanicData GetMechanicData() {
       MechanicData mechanicData = new MechanicData();
@@ -54,8 +68,14 @@ namespace Pantheon.Mechanics {
                     // new WaitEvent() {
                     //   timeToWait = 8.4333333333333333333333333333333f,
                     // },
+                    // new SpawnMechanicEvent() {
+                    //   referenceMechanicName = _ascalonsMercyConcealed,
+                    // },
+                    // new WaitEvent() {
+                    //   timeToWait = 16.5f,
+                    // },
                     new SpawnMechanicEvent() {
-                      referenceMechanicName = _ascalonsMercyConcealed,
+                      referenceMechanicName = _strengthOfTheWard,
                     },
                     new WaitEvent() {
                       timeToWait = float.PositiveInfinity,
@@ -117,12 +137,87 @@ namespace Pantheon.Mechanics {
                 },
           };
 
+      mechanicData.referenceMechanicProperties[_strengthOfTheWard] = new MechanicProperties() {
+        visible = false,
+        mechanic =
+            new ExecuteMultipleEvents() {
+              events =
+                  new List<MechanicEvent>() {
+                    new StartCastBar() {
+                      castName = "Strength of the Ward",
+                      duration = _strengthOfTheWardCastDuration,
+                    },
+                    new WaitEvent() {
+                      timeToWait =
+                          _strengthOfTheWardCastDuration + _strengthOfTheWardHeavyImpactBeforeStart,
+                    },
+                    new SpawnMechanicEvent() {
+                      referenceMechanicName = _strengthOfTheWardHeavyImpact,
+                      position = new Vector2(0, _strengthOfTheWardHeavyImpactPosition),
+                    },
+                  },
+            },
+      };
+      List<string> strengthOfTheWardHeavyImpactDamageNames = new List<string>();
+      for (int i = 0; i < 5; ++i) {
+        strengthOfTheWardHeavyImpactDamageNames.Add($"{_strengthOfTheWardHeavyImpactDamage}{i}");
+      }
+      mechanicData.referenceMechanicProperties[_strengthOfTheWardHeavyImpact] =
+          new MechanicProperties() {
+            visible = true,
+            collisionShape = CollisionShape.Round,
+            collisionShapeParams = new Vector4(_strengthOfTheWardHeavyImpactRadius, 360, 0, 0),
+            mechanic =
+                new ExecuteMultipleEvents() {
+                  events =
+                      new List<MechanicEvent>() {
+                        new WaitEvent() {
+                          timeToWait = _strengthOfTheWardCastDuration,
+                        },
+                        new SpawnMechanicEvent() {
+                          referenceMechanicName = strengthOfTheWardHeavyImpactDamageNames[0],
+                          isPositionRelative = true,
+                        },
+                      },
+                },
+          };
+      for (int i = 0; i < strengthOfTheWardHeavyImpactDamageNames.Count; ++i) {
+        List<MechanicEvent> events = new List<MechanicEvent>() {
+          new ApplyEffectToPlayers() {
+            effect =
+                new DamageEffect() {
+                  damageAmount = 100000,
+                },
+          },
+          new WaitEvent() {
+            timeToWait = _strengthOfTheWardHeavyImpactDamageInterval,
+          },
+        };
+        if (i + 1 < strengthOfTheWardHeavyImpactDamageNames.Count) {
+          events.Add(new SpawnMechanicEvent() {
+            referenceMechanicName = strengthOfTheWardHeavyImpactDamageNames[i + 1],
+            isPositionRelative = true,
+          });
+        }
+        mechanicData.referenceMechanicProperties[strengthOfTheWardHeavyImpactDamageNames[i]] =
+            new MechanicProperties() {
+              visible = true,
+              collisionShape = CollisionShape.Round,
+              collisionShapeParams = new Vector4(_strengthOfTheWardHeavyImpactRadius * (i + 1), 360,
+                                                 _strengthOfTheWardHeavyImpactRadius * i),
+              mechanic =
+                  new ExecuteMultipleEvents() {
+                    events = events,
+                  },
+            };
+      }
+
       mechanicData.mechanicEvents = new List<MechanicEvent>() {
         new SpawnVisualObject() {
           textureFilePath = "Mechanics/Resources/ArenaCircle.png",
           relativePosition = new Vector3(0, -0.001f, 0),
           eulerAngles = new Vector3(90, 0, 0),
-          scale = new Vector3(46.83f, 46.83f, 1),
+          scale = new Vector3(_arenaRadius * 2, _arenaRadius * 2, 1),
           visualDuration = float.PositiveInfinity,
         },
         new SpawnMechanicEvent() {

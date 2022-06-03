@@ -112,16 +112,17 @@ namespace Pantheon {
           innerRadius, angle, visible, aoeMarkerId.ToByteArray());
 
       MechanicContext childContext = InheritContext(mechanicContext);
-      childContext.Visible &= visible;
+      childContext.Visible = visible;
       childContext.IsTargeted = mechanicProperties.isTargeted.GetValueOrDefault();
+      UpdateCollision(childContext, mechanicProperties);
+
       _coroutines.Add(StartCoroutine(Execute(mechanicProperties.mechanic, childContext)));
 
       float endTime = Time.time + duration;
-
       while (Time.time < endTime) {
         if (childContext.IsTargeted) {
-          Vector2 targetPosition = new Vector2(mechanicContext.Target.transform.position.x,
-                                               mechanicContext.Target.transform.position.z);
+          Vector2 targetPosition = new Vector2(childContext.Target.transform.position.x,
+                                               childContext.Target.transform.position.z);
           Vector2 diff = targetPosition - childContext.Position;
 
           float movement = Mathf.Min(
@@ -129,22 +130,18 @@ namespace Pantheon {
           childContext.Position += diff.normalized * movement;
 
           if (diff == Vector2.zero) {
-            mechanicContext.Forward = new Vector2(0, 1);
+            childContext.Forward = Vector2.up;
           } else {
-            mechanicContext.Forward = diff.normalized;
+            childContext.Forward = diff.normalized;
           }
         }
 
-        UpdateAoeMarkerClientRpc(new Vector3(childContext.Position.x, 0, childContext.Position.y),
-                                 Quaternion.LookRotation(new Vector3(mechanicContext.Forward.x, 0,
-                                                                     mechanicContext.Forward.y)),
-                                 childContext.Visible, aoeMarkerId.ToByteArray());
+        UpdateAoeMarkerClientRpc(
+            new Vector3(childContext.Position.x, 0, childContext.Position.y),
+            Quaternion.LookRotation(new Vector3(childContext.Forward.x, 0, childContext.Forward.y)),
+            childContext.Visible, aoeMarkerId.ToByteArray());
 
-        if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
-          Vector4 shapeParams = mechanicProperties.collisionShapeParams.GetValueOrDefault();
-          childContext.Collision = new RoundCollision(
-              mechanicContext.Position, mechanicContext.Forward, shapeParams.x, shapeParams.y);
-        }
+        UpdateCollision(childContext, mechanicProperties);
 
         yield return null;
       }
@@ -307,11 +304,9 @@ namespace Pantheon {
     private void SpawnAoeMarkerClientRpc(Vector3 position, float duration, float radius,
                                          float innerRadius, float angle, bool visible, byte[] id) {
       AoeMarker aoeMarker = Instantiate(_aoeMarkerPrefab).GetComponent<AoeMarker>();
+      aoeMarker.SetRound(radius, innerRadius, angle);
       aoeMarker.transform.position = position;
       aoeMarker.Duration = duration;
-      aoeMarker.Radius = radius;
-      aoeMarker.InnerRadius = innerRadius;
-      aoeMarker.Angle = angle;
       aoeMarker.Visible = visible;
       _aoeMarkers[new Guid(id)] = aoeMarker;
     }
@@ -325,16 +320,22 @@ namespace Pantheon {
       aoeMarker.Visible = visible;
     }
 
+    private void UpdateCollision(MechanicContext mechanicContext,
+                                 XivSimParser.MechanicProperties mechanicProperties) {
+      if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
+        Vector4 shapeParams = mechanicProperties.collisionShapeParams.GetValueOrDefault();
+        mechanicContext.Collision = new RoundCollision(
+            mechanicContext.Position, direction: mechanicContext.Forward, radius: shapeParams.x,
+            innerRadius: shapeParams.z, angle: shapeParams.y);
+      }
+    }
+
     private static MechanicContext InheritContext(MechanicContext parent) {
       return new MechanicContext() {
-        Parent = parent,
-        Visible = parent.Visible,
-        Source = parent.Source,
-        Position = parent.Position,
-        Collision = parent.Collision,
-        Target = parent.Target,
-        IsTargeted = parent.IsTargeted,
-        Forward = parent.Forward,
+        Parent = parent,        Visible = false,
+        Source = parent.Source, Position = new Vector2(0, 0),
+        Collision = null,       Target = parent.Target,
+        IsTargeted = false,     Forward = Vector2.up,
       };
     }
 
@@ -346,7 +347,7 @@ namespace Pantheon {
       public ICollision Collision;
       public NetworkPlayer Target;
       public bool IsTargeted;
-      public Vector2 Forward = new Vector2(0, 1);
+      public Vector2 Forward = Vector2.up;
     }
 
     private interface ICollision {
@@ -356,20 +357,23 @@ namespace Pantheon {
     private class RoundCollision : ICollision {
       private Vector2 _position;
       private Vector2 _direction;
-      private float _maxRange;
+      private float _radius;
+      private float _innerRadius;
       private float _angle;
 
-      public RoundCollision(Vector2 position, Vector2 direction, float maxRange, float angle) {
+      public RoundCollision(Vector2 position, Vector2 direction, float radius, float innerRadius,
+                            float angle) {
         _position = position;
         _direction = direction;
-        _maxRange = maxRange;
+        _radius = radius;
+        _innerRadius = innerRadius;
         _angle = angle;
       }
 
       public bool CollidesWith(Vector2 position) {
         Vector2 diff = position - _position;
-        bool distance = diff.magnitude < _maxRange;
-        bool angle = (diff == Vector2.zero) || Vector2.Angle(diff, _direction) < _angle / 2;
+        bool distance = _innerRadius <= diff.magnitude && diff.magnitude <= _radius;
+        bool angle = (diff == Vector2.zero) || Vector2.Angle(diff, _direction) <= _angle / 2;
         return distance && angle;
       }
     }

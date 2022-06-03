@@ -5,28 +5,10 @@ using System;
 
 namespace Pantheon {
   public class AoeMarker : MonoBehaviour {
-    public float Angle {
-      get { return _material.GetFloat("_Angle"); }
-
-      set { _material.SetFloat("_Angle", value); }
-    }
-
     public Color TintColor {
       get { return _material.GetColor("_Color"); }
 
       set { _material.SetColor("_Color", value); }
-    }
-
-    public float Radius {
-      get { return _projector.orthographicSize / 2; }
-
-      set { _projector.orthographicSize = value * 2; }
-    }
-
-    public float InnerRadius {
-      get { return _material.GetFloat("_InnerRadius") * Radius; }
-
-      set { _material.SetFloat("_InnerRadius", value / Radius); }
     }
 
     public bool Visible {
@@ -43,16 +25,17 @@ namespace Pantheon {
     [SerializeField]
     private Animator _animator;
 
+    [SerializeField]
+    private Material _roundMaterial;
+
+    [SerializeField]
+    private Material _rectangleMaterial;
+
     private Material _material;
 
     private float _prevAngle;
     private float _prevOpacity = -1;
     private float _prevInnerRadius = -1;
-
-    private void Awake() {
-      _material = new Material(_projector.material);
-      _projector.material = _material;
-    }
 
     private IEnumerator Start() {
       if (Duration == 0) {
@@ -92,8 +75,17 @@ namespace Pantheon {
 
     private void UpdateProperties() {
       Vector3 eular = _projector.transform.localRotation.eulerAngles;
-      eular.y = 180 - Angle / 2;
+      eular.y = 180 - _material.GetFloat("_Angle") / 2;
       _projector.transform.localRotation = Quaternion.Euler(eular);
+    }
+
+    public void SetRound(float radius, float innerRadius, float angle) {
+      _material = new Material(_roundMaterial);
+      _projector.material = _material;
+
+      _projector.orthographicSize = radius;
+      _material.SetFloat("_InnerRadius", innerRadius / radius);
+      _material.SetFloat("_Angle", angle);
     }
   }
 }

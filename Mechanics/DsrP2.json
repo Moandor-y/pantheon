@@ -36,7 +36,7 @@
         "events": [
           {
             "$type": "SpawnMechanicEvent",
-            "referenceMechanicName": "AscalonsMercyConcealed"
+            "referenceMechanicName": "StrengthOfTheWard"
           },
           {
             "$type": "WaitEvent",
@@ -108,6 +108,215 @@
           {
             "$type": "WaitEvent",
             "timeToWait": 0.8
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWard": {
+      "visible": false,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "StartCastBar",
+            "castName": "Strength of the Ward",
+            "duration": 3.6833334
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 10.65
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardHeavyImpact",
+            "position": {
+              "x": 0.0,
+              "y": 3.96253872
+            }
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardHeavyImpact": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 3.6023078,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      },
+      "visible": true,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 3.6833334
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardHeavyImpactDamage0",
+            "isPositionRelative": true
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardHeavyImpactDamage0": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 3.6023078,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      },
+      "visible": true,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "ApplyEffectToPlayers",
+            "affectLivingOnly": true,
+            "effect": {
+              "$type": "DamageEffect",
+              "damageAmount": 100000.0,
+              "maxStackAmount": 1
+            }
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.81666672
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardHeavyImpactDamage1",
+            "isPositionRelative": true
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardHeavyImpactDamage1": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 7.20461559,
+        "y": 360.0,
+        "z": 3.6023078,
+        "w": 0.0
+      },
+      "visible": true,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "ApplyEffectToPlayers",
+            "affectLivingOnly": true,
+            "effect": {
+              "$type": "DamageEffect",
+              "damageAmount": 100000.0,
+              "maxStackAmount": 1
+            }
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.81666672
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardHeavyImpactDamage2",
+            "isPositionRelative": true
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardHeavyImpactDamage2": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 10.8069229,
+        "y": 360.0,
+        "z": 7.20461559,
+        "w": 0.0
+      },
+      "visible": true,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "ApplyEffectToPlayers",
+            "affectLivingOnly": true,
+            "effect": {
+              "$type": "DamageEffect",
+              "damageAmount": 100000.0,
+              "maxStackAmount": 1
+            }
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.81666672
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardHeavyImpactDamage3",
+            "isPositionRelative": true
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardHeavyImpactDamage3": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 14.4092312,
+        "y": 360.0,
+        "z": 10.8069229,
+        "w": 0.0
+      },
+      "visible": true,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "ApplyEffectToPlayers",
+            "affectLivingOnly": true,
+            "effect": {
+              "$type": "DamageEffect",
+              "damageAmount": 100000.0,
+              "maxStackAmount": 1
+            }
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.81666672
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardHeavyImpactDamage4",
+            "isPositionRelative": true
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardHeavyImpactDamage4": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 18.01154,
+        "y": 360.0,
+        "z": 14.4092312,
+        "w": 0.0
+      },
+      "visible": true,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "ApplyEffectToPlayers",
+            "affectLivingOnly": true,
+            "effect": {
+              "$type": "DamageEffect",
+              "damageAmount": 100000.0,
+              "maxStackAmount": 1
+            }
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.81666672
           }
         ]
       }
