@@ -123,16 +123,9 @@
             "duration": 3.6833334
           },
           {
-            "$type": "WaitEvent",
-            "timeToWait": 10.65
-          },
-          {
-            "$type": "SpawnMechanicEvent",
-            "referenceMechanicName": "StrengthOfTheWardHeavyImpact",
-            "position": {
-              "x": 0.0,
-              "y": 3.96253872
-            }
+            "$type": "ExecuteRandomEvents",
+            "mechanicPoolName": "StrengthOfTheWardSpiralThrustPool",
+            "numberToSpawn": 3
           }
         ]
       }
@@ -320,7 +313,132 @@
           }
         ]
       }
+    },
+    "StrengthOfTheWardSpiralThrust": {
+      "collisionShape": "Rectangle",
+      "collisionShapeParams": {
+        "x": 46.83,
+        "y": 17.9210663,
+        "z": 0.0,
+        "w": 0.0
+      },
+      "visible": true,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "WaitEvent",
+            "timeToWait": "Infinity"
+          }
+        ]
+      }
     }
+  },
+  "mechanicPools": {
+    "StrengthOfTheWardHeavyImpactPool": [
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardHeavyImpact",
+        "position": {
+          "x": 3.96253872,
+          "y": 0.0
+        }
+      },
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardHeavyImpact",
+        "position": {
+          "x": 2.801938,
+          "y": 2.801938
+        }
+      },
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardHeavyImpact",
+        "position": {
+          "x": -1.73208065E-07,
+          "y": 3.96253872
+        }
+      },
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardHeavyImpact",
+        "position": {
+          "x": -2.801938,
+          "y": 2.801938
+        }
+      },
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardHeavyImpact",
+        "position": {
+          "x": -3.96253872,
+          "y": -3.4641613E-07
+        }
+      },
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardHeavyImpact",
+        "position": {
+          "x": -2.8019383,
+          "y": -2.80193782
+        }
+      },
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardHeavyImpact",
+        "position": {
+          "x": 4.72528E-08,
+          "y": -3.96253872
+        }
+      },
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardHeavyImpact",
+        "position": {
+          "x": 2.80193758,
+          "y": -2.80193853
+        }
+      }
+    ],
+    "StrengthOfTheWardSpiralThrustPool": [
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardSpiralThrust",
+        "position": {
+          "x": 23.415,
+          "y": 0.0
+        },
+        "rotation": -90.0
+      },
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardSpiralThrust",
+        "position": {
+          "x": 16.5569057,
+          "y": 16.5569057
+        },
+        "rotation": -135.0
+      },
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardSpiralThrust",
+        "position": {
+          "x": -1.02350225E-06,
+          "y": 23.415
+        },
+        "rotation": -180.0
+      },
+      {
+        "$type": "SpawnMechanicEvent",
+        "referenceMechanicName": "StrengthOfTheWardSpiralThrust",
+        "position": {
+          "x": -16.5569057,
+          "y": 16.5569057
+        },
+        "rotation": -225.0
+      }
+    ]
   },
   "mechanicEvents": [
     {

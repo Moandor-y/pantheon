@@ -84,7 +84,10 @@ namespace Pantheon {
     private IEnumerator Execute(XivSimParser.SpawnMechanicEvent spawnMechanicEvent,
                                 MechanicContext mechanicContext) {
       MechanicContext childContext = InheritContext(mechanicContext);
-      childContext.Position += spawnMechanicEvent.position;
+      childContext.Position = spawnMechanicEvent.position;
+      if (spawnMechanicEvent.isPositionRelative) {
+        childContext.Position += mechanicContext.Position;
+      }
       _coroutines.Add(StartCoroutine(Execute(
           _mechanicData.referenceMechanicProperties[spawnMechanicEvent.referenceMechanicName],
           childContext)));
@@ -333,7 +336,7 @@ namespace Pantheon {
     private static MechanicContext InheritContext(MechanicContext parent) {
       return new MechanicContext() {
         Parent = parent,        Visible = false,
-        Source = parent.Source, Position = new Vector2(0, 0),
+        Source = parent.Source, Position = parent.Position,
         Collision = null,       Target = parent.Target,
         IsTargeted = false,     Forward = Vector2.up,
       };

@@ -20,9 +20,11 @@ namespace Pantheon.Mechanics {
     private const float _ascalonsMercyConcealedDamageDelay = 1.8833333333333333333333333333333f;
 
     private const string _strengthOfTheWard = "StrengthOfTheWard";
+    private const float _strengthOfTheWardCastDuration = 3.6833333333333333333333333333333f;
+
     private const string _strengthOfTheWardHeavyImpact = "StrengthOfTheWardHeavyImpact";
     private const string _strengthOfTheWardHeavyImpactDamage = "StrengthOfTheWardHeavyImpactDamage";
-    private const float _strengthOfTheWardCastDuration = 3.6833333333333333333333333333333f;
+    private const string _strengthOfTheWardHeavyImpactPool = "StrengthOfTheWardHeavyImpactPool";
     private const float _strengthOfTheWardHeavyImpactRadius = _arenaRadius / 6.5f;
     private const float _strengthOfTheWardHeavyImpactPosition =
         _strengthOfTheWardHeavyImpactRadius * 1.1f;
@@ -31,6 +33,9 @@ namespace Pantheon.Mechanics {
     private const float _strengthOfTheWardHeavyImpactCastDuration = 5.7f;
     private const float _strengthOfTheWardHeavyImpactDamageInterval =
         1.8166666666666666666666666666667f;
+
+    private const string _strengthOfTheWardSpiralThrust = "StrengthOfTheWardSpiralThrust";
+    private const string _strengthOfTheWardSpiralThrustPool = "StrengthOfTheWardSpiralThrustPool";
 
     public static MechanicData GetMechanicData() {
       MechanicData mechanicData = new MechanicData();
@@ -147,13 +152,17 @@ namespace Pantheon.Mechanics {
                       castName = "Strength of the Ward",
                       duration = _strengthOfTheWardCastDuration,
                     },
-                    new WaitEvent() {
-                      timeToWait =
-                          _strengthOfTheWardCastDuration + _strengthOfTheWardHeavyImpactBeforeStart,
-                    },
-                    new SpawnMechanicEvent() {
-                      referenceMechanicName = _strengthOfTheWardHeavyImpact,
-                      position = new Vector2(0, _strengthOfTheWardHeavyImpactPosition),
+                    // new WaitEvent() {
+                    //   timeToWait =
+                    //       _strengthOfTheWardCastDuration +
+                    //       _strengthOfTheWardHeavyImpactBeforeStart,
+                    // },
+                    // new ExecuteRandomEvents() {
+                    //   mechanicPoolName = _strengthOfTheWardHeavyImpactPool,
+                    // },
+                    new ExecuteRandomEvents() {
+                      mechanicPoolName = _strengthOfTheWardSpiralThrustPool,
+                      numberToSpawn = 3,
                     },
                   },
             },
@@ -212,6 +221,23 @@ namespace Pantheon.Mechanics {
             };
       }
 
+      mechanicData.referenceMechanicProperties[_strengthOfTheWardSpiralThrust] =
+          new MechanicProperties() {
+            visible = true,
+            collisionShape = CollisionShape.Rectangle,
+            collisionShapeParams = new Vector4(
+                2 * _arenaRadius, 2 * _arenaRadius * Mathf.Sin(45.0f / 2 * Mathf.Deg2Rad), 0, 0),
+            mechanic =
+                new ExecuteMultipleEvents() {
+                  events =
+                      new List<MechanicEvent>() {
+                        new WaitEvent() {
+                          timeToWait = float.PositiveInfinity,
+                        },
+                      },
+                },
+          };
+
       mechanicData.mechanicEvents = new List<MechanicEvent>() {
         new SpawnVisualObject() {
           textureFilePath = "Mechanics/Resources/ArenaCircle.png",
@@ -224,6 +250,31 @@ namespace Pantheon.Mechanics {
           referenceMechanicName = _spawnThordan,
         },
       };
+
+      mechanicData.mechanicPools = new Dictionary<string, List<MechanicEvent>> {
+        { _strengthOfTheWardHeavyImpactPool, new List<MechanicEvent>() },
+        { _strengthOfTheWardSpiralThrustPool, new List<MechanicEvent>() },
+      };
+      for (int i = 0; i < 8; ++i) {
+        int degrees = i * 45;
+        mechanicData.mechanicPools[_strengthOfTheWardHeavyImpactPool].Add(new SpawnMechanicEvent() {
+          referenceMechanicName = _strengthOfTheWardHeavyImpact,
+          position = new Vector2(
+              Mathf.Cos(Mathf.Deg2Rad * degrees) * _strengthOfTheWardHeavyImpactPosition,
+              Mathf.Sin(Mathf.Deg2Rad * degrees) * _strengthOfTheWardHeavyImpactPosition),
+        });
+      }
+      for (int i = 0; i < 4; ++i) {
+        int degrees = i * 45;
+        mechanicData.mechanicPools[_strengthOfTheWardSpiralThrustPool].Add(
+            new SpawnMechanicEvent() {
+              referenceMechanicName = _strengthOfTheWardSpiralThrust,
+              position = new Vector2(Mathf.Cos(Mathf.Deg2Rad * degrees) * _arenaRadius,
+                                     Mathf.Sin(Mathf.Deg2Rad * degrees) * _arenaRadius),
+              rotation = -degrees - 90,
+            });
+      }
+
       return mechanicData;
     }
   }
