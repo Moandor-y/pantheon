@@ -6,6 +6,26 @@
     "MechanicNonTargeted": {
       "isTargeted": false
     },
+    "MechanicArenaBoundary": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 100.0,
+        "y": 360.0,
+        "z": 23.415,
+        "w": 0.0
+      },
+      "visible": true,
+      "persistentTickInterval": 0.2,
+      "persistentMechanic": {
+        "$type": "ApplyEffectToPlayers",
+        "affectLivingOnly": true,
+        "effect": {
+          "$type": "DamageEffect",
+          "damageAmount": 9999999.0,
+          "maxStackAmount": 1
+        }
+      }
+    },
     "SpawnThordan": {
       "visible": false,
       "mechanic": {
@@ -406,28 +426,27 @@
         "$type": "SpawnMechanicEvent",
         "referenceMechanicName": "StrengthOfTheWardSpiralThrust",
         "position": {
-          "x": 23.415,
-          "y": 0.0
-        },
-        "rotation": -90.0
+          "x": 0.0,
+          "y": -23.415
+        }
       },
       {
         "$type": "SpawnMechanicEvent",
         "referenceMechanicName": "StrengthOfTheWardSpiralThrust",
         "position": {
-          "x": 16.5569057,
-          "y": 16.5569057
+          "x": -16.5569057,
+          "y": -16.5569057
         },
-        "rotation": -135.0
+        "rotation": 45.0
       },
       {
         "$type": "SpawnMechanicEvent",
         "referenceMechanicName": "StrengthOfTheWardSpiralThrust",
         "position": {
-          "x": -1.02350225E-06,
-          "y": 23.415
+          "x": -23.415,
+          "y": 1.02350225E-06
         },
-        "rotation": -180.0
+        "rotation": 90.0
       },
       {
         "$type": "SpawnMechanicEvent",
@@ -436,7 +455,7 @@
           "x": -16.5569057,
           "y": 16.5569057
         },
-        "rotation": -225.0
+        "rotation": 135.0
       }
     ]
   },
@@ -465,6 +484,10 @@
     {
       "$type": "SpawnMechanicEvent",
       "referenceMechanicName": "SpawnThordan"
+    },
+    {
+      "$type": "SpawnMechanicEvent",
+      "referenceMechanicName": "MechanicArenaBoundary"
     }
   ],
   "defaultHealth": 130000

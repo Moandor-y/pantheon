@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 using System;
 using Unity.Netcode;
+using UnityEngine.Assertions;
 
 namespace Pantheon {
   public class MechanicManager : NetworkBehaviour {
@@ -68,6 +69,8 @@ namespace Pantheon {
 
     private IEnumerator Execute(XivSimParser.MechanicEvent mechanicEvent,
                                 MechanicContext mechanicContext) {
+      Assert.IsNotNull(mechanicEvent);
+      Assert.IsNotNull(mechanicContext);
       yield return Execute((dynamic)mechanicEvent, mechanicContext);
     }
 
@@ -84,10 +87,19 @@ namespace Pantheon {
     private IEnumerator Execute(XivSimParser.SpawnMechanicEvent spawnMechanicEvent,
                                 MechanicContext mechanicContext) {
       MechanicContext childContext = InheritContext(mechanicContext);
+
       childContext.Position = spawnMechanicEvent.position;
       if (spawnMechanicEvent.isPositionRelative) {
         childContext.Position += mechanicContext.Position;
       }
+
+      if (spawnMechanicEvent.isRotationRelative) {
+        childContext.Forward =
+            RotateClockwise(mechanicContext.Forward, spawnMechanicEvent.rotation);
+      } else {
+        childContext.Forward = RotateClockwise(Vector2.up, spawnMechanicEvent.rotation);
+      }
+
       _coroutines.Add(StartCoroutine(Execute(
           _mechanicData.referenceMechanicProperties[spawnMechanicEvent.referenceMechanicName],
           childContext)));
@@ -96,30 +108,38 @@ namespace Pantheon {
 
     private IEnumerator Execute(XivSimParser.MechanicProperties mechanicProperties,
                                 MechanicContext mechanicContext) {
-      float duration = GetDuration(mechanicProperties.mechanic);
+      float duration = mechanicProperties.mechanic == null
+                           ? float.PositiveInfinity
+                           : GetDuration(mechanicProperties.mechanic);
       Guid aoeMarkerId = Guid.NewGuid();
 
       bool visible = mechanicProperties.visible.GetValueOrDefault();
-
-      float radius = 0;
-      float angle = 0;
-      float innerRadius = 0;
-      if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
-        Vector4 shapeParams = mechanicProperties.collisionShapeParams.GetValueOrDefault();
-        radius = shapeParams.x;
-        angle = shapeParams.y;
-        innerRadius = shapeParams.z;
-      }
-      SpawnAoeMarkerClientRpc(
-          new Vector3(mechanicContext.Position.x, 0, mechanicContext.Position.y), duration, radius,
-          innerRadius, angle, visible, aoeMarkerId.ToByteArray());
 
       MechanicContext childContext = InheritContext(mechanicContext);
       childContext.Visible = visible;
       childContext.IsTargeted = mechanicProperties.isTargeted.GetValueOrDefault();
       UpdateCollision(childContext, mechanicProperties);
 
-      _coroutines.Add(StartCoroutine(Execute(mechanicProperties.mechanic, childContext)));
+      Vector4 shapeParams = mechanicProperties.collisionShapeParams.GetValueOrDefault();
+      if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
+        SpawnRoundAoeMarkerClientRpc(
+            new Vector3(childContext.Position.x, 0, childContext.Position.y), duration,
+            radius: shapeParams.x, innerRadius: shapeParams.z, angle: shapeParams.y, visible,
+            childContext.Forward, aoeMarkerId.ToByteArray());
+      } else if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Rectangle) {
+        SpawnRectAoeMarkerClientRpc(
+            new Vector3(childContext.Position.x, 0, childContext.Position.y), duration,
+            length: shapeParams.x, width: shapeParams.y, visible, childContext.Forward,
+            aoeMarkerId.ToByteArray());
+      } else {
+        SpawnRoundAoeMarkerClientRpc(
+            new Vector3(childContext.Position.x, 0, childContext.Position.y), duration, radius: 0,
+            innerRadius: 0, angle: 0, visible, childContext.Forward, aoeMarkerId.ToByteArray());
+      }
+
+      if (mechanicProperties.mechanic != null) {
+        _coroutines.Add(StartCoroutine(Execute(mechanicProperties.mechanic, childContext)));
+      }
 
       float endTime = Time.time + duration;
       while (Time.time < endTime) {
@@ -161,9 +181,9 @@ namespace Pantheon {
                                 MechanicContext mechanicContext) {
       List<XivSimParser.MechanicEvent> pool =
           _mechanicData.mechanicPools[executeRandomEvents.mechanicPoolName];
+      ShuffleList(pool);
       for (int i = 0; i < executeRandomEvents.numberToSpawn; ++i) {
-        _coroutines.Add(
-            StartCoroutine(Execute(pool[_random.Range(0, pool.Count)], mechanicContext)));
+        _coroutines.Add(StartCoroutine(Execute(pool[i % pool.Count], mechanicContext)));
       }
       yield break;
     }
@@ -199,12 +219,7 @@ namespace Pantheon {
 
     private IEnumerator Execute(XivSimParser.ReshufflePlayerIds reshufflePlayerIds,
                                 MechanicContext mechanicContext) {
-      for (int i = _players.Count - 1; i > 1; --i) {
-        int j = _random.UniformInt(0, i);
-        NetworkPlayer temp = _players[i];
-        _players[i] = _players[j];
-        _players[j] = temp;
-      }
+      ShuffleList(_players);
       yield break;
     }
 
@@ -274,9 +289,12 @@ namespace Pantheon {
     }
 
     private float GetDuration(XivSimParser.MechanicEvent mechanicEvent) {
+      Assert.IsNotNull(mechanicEvent);
+
       if (mechanicEvent is XivSimParser.WaitEvent) {
         return ((XivSimParser.WaitEvent)mechanicEvent).timeToWait;
       }
+
       if (mechanicEvent is XivSimParser.ExecuteMultipleEvents) {
         float duration = 0;
         foreach (XivSimParser
@@ -287,6 +305,7 @@ namespace Pantheon {
         }
         return duration;
       }
+
       return 0;
     }
 
@@ -304,11 +323,28 @@ namespace Pantheon {
     }
 
     [ClientRpc]
-    private void SpawnAoeMarkerClientRpc(Vector3 position, float duration, float radius,
-                                         float innerRadius, float angle, bool visible, byte[] id) {
+    private void SpawnRoundAoeMarkerClientRpc(Vector3 position, float duration, float radius,
+                                              float innerRadius, float angle, bool visible,
+                                              Vector2 forward, byte[] id) {
       AoeMarker aoeMarker = Instantiate(_aoeMarkerPrefab).GetComponent<AoeMarker>();
       aoeMarker.SetRound(radius, innerRadius, angle);
       aoeMarker.transform.position = position;
+      aoeMarker.transform.rotation =
+          Quaternion.LookRotation(new Vector3(forward.x, 0, forward.y), Vector3.up);
+      aoeMarker.Duration = duration;
+      aoeMarker.Visible = visible;
+      _aoeMarkers[new Guid(id)] = aoeMarker;
+    }
+
+    [ClientRpc]
+    private void SpawnRectAoeMarkerClientRpc(Vector3 position, float duration, float length,
+                                             float width, bool visible, Vector2 forward,
+                                             byte[] id) {
+      AoeMarker aoeMarker = Instantiate(_aoeMarkerPrefab).GetComponent<AoeMarker>();
+      aoeMarker.SetRectangle(length, width);
+      aoeMarker.transform.position = position;
+      aoeMarker.transform.rotation =
+          Quaternion.LookRotation(new Vector3(forward.x, 0, forward.y), Vector3.up);
       aoeMarker.Duration = duration;
       aoeMarker.Visible = visible;
       _aoeMarkers[new Guid(id)] = aoeMarker;
@@ -333,13 +369,26 @@ namespace Pantheon {
       }
     }
 
+    private void ShuffleList<T>(List<T> list) {
+      for (int i = list.Count - 1; i > 1; --i) {
+        int j = _random.UniformInt(0, i);
+        T temp = list[i];
+        list[i] = list[j];
+        list[j] = temp;
+      }
+    }
+
     private static MechanicContext InheritContext(MechanicContext parent) {
       return new MechanicContext() {
         Parent = parent,        Visible = false,
         Source = parent.Source, Position = parent.Position,
         Collision = null,       Target = parent.Target,
-        IsTargeted = false,     Forward = Vector2.up,
+        IsTargeted = false,     Forward = parent.Forward,
       };
+    }
+
+    private static Vector2 RotateClockwise(Vector2 from, float angle) {
+      return Quaternion.AngleAxis(angle, Vector3.back) * from;
     }
 
     private class MechanicContext {

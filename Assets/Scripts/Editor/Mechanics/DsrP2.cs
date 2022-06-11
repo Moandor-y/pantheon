@@ -8,6 +8,7 @@ namespace Pantheon.Mechanics {
   public static class DsrP2 {
     private const string _mechanicVisible = "MechanicVisible";
     private const string _mechanicNonTargeted = "MechanicNonTargeted";
+    private const string _mechanicArenaBoundary = "MechanicArenaBoundary";
 
     private const float _arenaRadius = 46.83f / 2;
 
@@ -48,6 +49,19 @@ namespace Pantheon.Mechanics {
         isTargeted = false,
       };
 
+      mechanicData.referenceMechanicProperties[_mechanicArenaBoundary] = new MechanicProperties() {
+        visible = true,
+        collisionShape = CollisionShape.Round,
+        collisionShapeParams = new Vector4(100, 360, _arenaRadius, 0),
+        persistentTickInterval = 0.2f,
+        persistentMechanic =
+            new ApplyEffectToPlayers() {
+              effect =
+                  new DamageEffect() {
+                    damageAmount = 9999999,
+                  },
+            },
+      };
       mechanicData.referenceMechanicProperties[_spawnThordan] = new MechanicProperties() {
         visible = false,
         mechanic =
@@ -249,6 +263,9 @@ namespace Pantheon.Mechanics {
         new SpawnMechanicEvent() {
           referenceMechanicName = _spawnThordan,
         },
+        new SpawnMechanicEvent() {
+          referenceMechanicName = _mechanicArenaBoundary,
+        },
       };
 
       mechanicData.mechanicPools = new Dictionary<string, List<MechanicEvent>> {
@@ -269,9 +286,9 @@ namespace Pantheon.Mechanics {
         mechanicData.mechanicPools[_strengthOfTheWardSpiralThrustPool].Add(
             new SpawnMechanicEvent() {
               referenceMechanicName = _strengthOfTheWardSpiralThrust,
-              position = new Vector2(Mathf.Cos(Mathf.Deg2Rad * degrees) * _arenaRadius,
-                                     Mathf.Sin(Mathf.Deg2Rad * degrees) * _arenaRadius),
-              rotation = -degrees - 90,
+              position = new Vector2(-Mathf.Sin(Mathf.Deg2Rad * degrees) * _arenaRadius,
+                                     -Mathf.Cos(Mathf.Deg2Rad * degrees) * _arenaRadius),
+              rotation = degrees,
             });
       }
 

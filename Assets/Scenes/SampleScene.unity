@@ -1403,6 +1403,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 962144124117468908, guid: c1d0a93e8c76ba042a8691103c01fddd, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: fb40dde3a92c87e43ab536cfffb20fae, type: 2}
+    - target: {fileID: 962144124117468908, guid: c1d0a93e8c76ba042a8691103c01fddd, type: 3}
       propertyPath: m_OrthographicSize
       value: 1
       objectReference: {fileID: 0}
