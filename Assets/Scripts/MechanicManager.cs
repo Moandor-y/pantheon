@@ -270,6 +270,7 @@ namespace Pantheon {
         foreach (NetworkPlayer player in players) {
           player.Health -= Mathf.RoundToInt(damage);
         }
+      } else if (effect is XivSimParser.ApplyStatusEffect) {
       }
     }
 

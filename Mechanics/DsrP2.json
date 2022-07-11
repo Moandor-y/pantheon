@@ -143,9 +143,30 @@
             "duration": 3.6833334
           },
           {
+            "$type": "WaitEvent",
+            "timeToWait": 10.65
+          },
+          {
+            "$type": "ExecuteRandomEvents",
+            "mechanicPoolName": "StrengthOfTheWardHeavyImpactPool",
+            "numberToSpawn": 1
+          },
+          {
             "$type": "ExecuteRandomEvents",
             "mechanicPoolName": "StrengthOfTheWardSpiralThrustPool",
             "numberToSpawn": 3
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardLightningStorm"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 8.066667
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "AscalonsMercyConcealed"
           }
         ]
       }
@@ -164,7 +185,7 @@
         "events": [
           {
             "$type": "WaitEvent",
-            "timeToWait": 3.6833334
+            "timeToWait": 5.7
           },
           {
             "$type": "SpawnMechanicEvent",
@@ -348,7 +369,74 @@
         "events": [
           {
             "$type": "WaitEvent",
-            "timeToWait": "Infinity"
+            "timeToWait": 5.7
+          },
+          {
+            "$type": "ApplyEffectToPlayers",
+            "affectLivingOnly": true,
+            "effect": {
+              "$type": "DamageEffect",
+              "damageAmount": 100000.0,
+              "maxStackAmount": 1
+            }
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardLightningStorm": {
+      "visible": false,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 5.7
+          },
+          {
+            "$type": "SpawnTargetedEvents",
+            "targetingScheme": {
+              "$type": "TargetAllPlayers",
+              "targetLivingOnly": true
+            },
+            "referenceMechanicName": "StrengthOfTheWardLightningStormSingle",
+            "isPositionRelative": true,
+            "spawnOnTarget": true
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardLightningStormSingle": {
+      "isTargeted": true,
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 3.6023078,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      },
+      "visible": true,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "ApplyEffectToPlayers",
+            "affectLivingOnly": true,
+            "effects": [
+              {
+                "$type": "DamageEffect",
+                "damageType": "Lightning",
+                "damageAmount": 1.0,
+                "maxStackAmount": 1
+              },
+              {
+                "$type": "ApplyStatusEffect",
+                "referenceStatusName": "LightningStormVuln"
+              }
+            ]
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.0
           }
         ]
       }
@@ -458,6 +546,18 @@
         "rotation": 135.0
       }
     ]
+  },
+  "referenceStatusProperties": {
+    "LightningStormVuln": {
+      "$type": "DamageModifier",
+      "damageMultiplier": 100000.0,
+      "damageType": "Lightning",
+      "statusIconPath": "Mechanics/Resources/LightningVuln.png",
+      "statusName": "LightningStormVuln",
+      "statusDescription": "Lightning Resistance Down II",
+      "duration": 3.0,
+      "spreadDistance": -1.0
+    }
   },
   "mechanicEvents": [
     {

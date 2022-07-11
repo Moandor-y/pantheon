@@ -164,6 +164,11 @@ namespace Pantheon {
       public int maxStackAmount = 1;
     }
 
+    public class ApplyStatusEffect : MechanicEffect {
+      public string referenceStatusName;
+      public float? overrideDuration;
+    }
+
     public abstract class TargetingScheme {
       public Condition targetCondition;
       public TargetingScheme fallbackTargetingScheme;
@@ -186,7 +191,48 @@ namespace Pantheon {
 
     public enum CollisionShape { Round, Rectangle }
 
-    public class StatusEffectData {}
+    public class StatusEffectData {
+      public bool beneficial;
+      public string statusIconPath;
+      public string statusName;
+      public string statusDescription;
+
+      [DefaultValue(DisableType.None)]
+      public DisableType disableType;
+
+      public float duration;
+      public float tickInterval;
+      public bool shouldKeepOnDeath;
+      public bool trueStatus;
+
+      [DefaultValue(-1)]
+      public float spreadDistance = -1;
+
+      [DefaultValue(true)]
+      public bool forceExpireOnPlayerDeath = true;
+
+      [DefaultValue(1)]
+      public int maxStacks = 1;
+
+      [DefaultValue(true)]
+      public bool canOverwriteStatus = true;
+
+      public bool allowDuplicates;
+    }
+
+    public enum DisableType {
+      None = 0,
+      Movement = 1,
+      Actions = 1 << 1,
+      Knockback = 1 << 2,
+      Damage = 1 << 3,
+      Statuses = 1 << 4,
+    }
+
+    public class DamageModifier : StatusEffectData {
+      public float damageMultiplier;
+      public string damageType;
+    }
 
     public abstract class Condition {}
 

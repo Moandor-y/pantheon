@@ -12,6 +12,13 @@ namespace Pantheon.Mechanics {
 
     private const float _arenaRadius = 46.83f / 2;
 
+    private const string _statusLightningStormVuln = "LightningStormVuln";
+    private const string _statusLightningStormVulnName = "Lightning Resistance Down II";
+
+    private const string _damageTypeLightning = "Lightning";
+
+    private const float _damageMultiplier = 100000;
+
     private const string _spawnThordan = "SpawnThordan";
     private const string _thordanMechanics = "ThordanMechanics";
 
@@ -37,6 +44,15 @@ namespace Pantheon.Mechanics {
 
     private const string _strengthOfTheWardSpiralThrust = "StrengthOfTheWardSpiralThrust";
     private const string _strengthOfTheWardSpiralThrustPool = "StrengthOfTheWardSpiralThrustPool";
+
+    private const string _strengthOfTheWardLightningStorm = "StrengthOfTheWardLightningStorm";
+    private const string _strengthOfTheWardLightningStormSingle =
+        "StrengthOfTheWardLightningStormSingle";
+    private const float _strengthOfTheWardLightningStormEffectDuration = 1;
+    private const float _strengthOfTheWardLightningStormRadius = 7;
+
+    private const float _strengthOfTheWardAscalonsMercyConcealedBeforeStart =
+        8.0666666666666666666666666666667f;
 
     public static MechanicData GetMechanicData() {
       MechanicData mechanicData = new MechanicData();
@@ -166,17 +182,25 @@ namespace Pantheon.Mechanics {
                       castName = "Strength of the Ward",
                       duration = _strengthOfTheWardCastDuration,
                     },
-                    // new WaitEvent() {
-                    //   timeToWait =
-                    //       _strengthOfTheWardCastDuration +
-                    //       _strengthOfTheWardHeavyImpactBeforeStart,
-                    // },
-                    // new ExecuteRandomEvents() {
-                    //   mechanicPoolName = _strengthOfTheWardHeavyImpactPool,
-                    // },
+                    new WaitEvent() {
+                      timeToWait =
+                          _strengthOfTheWardCastDuration + _strengthOfTheWardHeavyImpactBeforeStart,
+                    },
+                    new ExecuteRandomEvents() {
+                      mechanicPoolName = _strengthOfTheWardHeavyImpactPool,
+                    },
                     new ExecuteRandomEvents() {
                       mechanicPoolName = _strengthOfTheWardSpiralThrustPool,
                       numberToSpawn = 3,
+                    },
+                    new SpawnMechanicEvent() {
+                      referenceMechanicName = _strengthOfTheWardLightningStorm,
+                    },
+                    new WaitEvent() {
+                      timeToWait = _strengthOfTheWardAscalonsMercyConcealedBeforeStart,
+                    },
+                    new SpawnMechanicEvent() {
+                      referenceMechanicName = _ascalonsMercyConcealed,
                     },
                   },
             },
@@ -195,7 +219,7 @@ namespace Pantheon.Mechanics {
                   events =
                       new List<MechanicEvent>() {
                         new WaitEvent() {
-                          timeToWait = _strengthOfTheWardCastDuration,
+                          timeToWait = _strengthOfTheWardHeavyImpactCastDuration,
                         },
                         new SpawnMechanicEvent() {
                           referenceMechanicName = strengthOfTheWardHeavyImpactDamageNames[0],
@@ -246,7 +270,62 @@ namespace Pantheon.Mechanics {
                   events =
                       new List<MechanicEvent>() {
                         new WaitEvent() {
-                          timeToWait = float.PositiveInfinity,
+                          timeToWait = _strengthOfTheWardHeavyImpactCastDuration,
+                        },
+                        new ApplyEffectToPlayers() {
+                          effect =
+                              new DamageEffect() {
+                                damageAmount = 100000,
+                              },
+                        },
+                      },
+                },
+          };
+
+      mechanicData.referenceMechanicProperties[_strengthOfTheWardLightningStorm] =
+          new MechanicProperties() {
+            visible = false,
+            mechanic =
+                new ExecuteMultipleEvents() {
+                  events =
+                      new List<MechanicEvent>() {
+                        new WaitEvent() {
+                          timeToWait = _strengthOfTheWardHeavyImpactCastDuration,
+                        },
+                        new SpawnTargetedEvents() {
+                          referenceMechanicName = _strengthOfTheWardLightningStormSingle,
+                          targetingScheme = new TargetAllPlayers(),
+                          isPositionRelative = true,
+                          spawnOnTarget = true,
+                        },
+                      },
+                },
+          };
+
+      mechanicData.referenceMechanicProperties[_strengthOfTheWardLightningStormSingle] =
+          new MechanicProperties() {
+            visible = true,
+            isTargeted = true,
+            collisionShape = CollisionShape.Round,
+            collisionShapeParams = new Vector4(_strengthOfTheWardHeavyImpactRadius, 360, 0, 0),
+            mechanic =
+                new ExecuteMultipleEvents() {
+                  events =
+                      new List<MechanicEvent>() {
+                        new ApplyEffectToPlayers() {
+                          effects =
+                              new List<MechanicEffect>() {
+                                new DamageEffect() {
+                                  damageAmount = 1,
+                                  damageType = _damageTypeLightning,
+                                },
+                                new ApplyStatusEffect() {
+                                  referenceStatusName = _statusLightningStormVuln,
+                                },
+                              },
+                        },
+                        new WaitEvent() {
+                          timeToWait = _strengthOfTheWardLightningStormEffectDuration,
                         },
                       },
                 },
@@ -291,6 +370,18 @@ namespace Pantheon.Mechanics {
               rotation = degrees,
             });
       }
+
+      mechanicData.referenceStatusProperties = new Dictionary<string, StatusEffectData> {
+        { _statusLightningStormVuln,
+          new DamageModifier() {
+            damageMultiplier = _damageMultiplier,
+            damageType = _damageTypeLightning,
+            statusName = _statusLightningStormVuln,
+            statusDescription = _statusLightningStormVulnName,
+            duration = 3,
+            statusIconPath = "Mechanics/Resources/LightningVuln.png",
+          } }
+      };
 
       return mechanicData;
     }
