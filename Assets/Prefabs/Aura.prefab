@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5754122435486460715
+--- !u!1 &7630418920979764861
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,23 +8,23 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5754122435486460714}
-  - component: {fileID: 319884184669370223}
-  - component: {fileID: 2983869707005603703}
+  - component: {fileID: 7630418920979764800}
+  - component: {fileID: 7630418920979764803}
+  - component: {fileID: 7630418920979764802}
   m_Layer: 0
-  m_Name: MechanicManager
+  m_Name: Aura
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5754122435486460714
+--- !u!4 &7630418920979764800
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5754122435486460715}
+  m_GameObject: {fileID: 7630418920979764861}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -33,29 +33,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &319884184669370223
+--- !u!114 &7630418920979764803
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5754122435486460715}
+  m_GameObject: {fileID: 7630418920979764861}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7df6d6945c28f94cbe63a0d73987111, type: 3}
+  m_Script: {fileID: 11500000, guid: d69431b8e24c0684881f9e964e9077b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _visualObjectPrefab: {fileID: 4106800437419981140, guid: 7eb0af1eeb2a1444398ca34a336c2435, type: 3}
-  _enemyPrefab: {fileID: 3849997696976312980, guid: d43725f7af42314408674d7cf92f3f94, type: 3}
-  _aoeMarkerPrefab: {fileID: 962144123672103951, guid: c1d0a93e8c76ba042a8691103c01fddd, type: 3}
-  _auraPrefab: {fileID: 7630418920979764861, guid: f7593d38deb829146ad9729f423e5e57, type: 3}
---- !u!114 &2983869707005603703
+  IconTexturePath: 
+  _auraListItemPrefab: {fileID: 6877381732914127297, guid: 61aef6b80ded08c4e85fbc5c202ed895, type: 3}
+--- !u!114 &7630418920979764802
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5754122435486460715}
+  m_GameObject: {fileID: 7630418920979764861}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}

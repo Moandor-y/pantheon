@@ -178,21 +178,22 @@ namespace Pantheon.Mechanics {
             new ExecuteMultipleEvents() {
               events =
                   new List<MechanicEvent>() {
-                    new StartCastBar() {
-                      castName = "Strength of the Ward",
-                      duration = _strengthOfTheWardCastDuration,
-                    },
-                    new WaitEvent() {
-                      timeToWait =
-                          _strengthOfTheWardCastDuration + _strengthOfTheWardHeavyImpactBeforeStart,
-                    },
-                    new ExecuteRandomEvents() {
-                      mechanicPoolName = _strengthOfTheWardHeavyImpactPool,
-                    },
-                    new ExecuteRandomEvents() {
-                      mechanicPoolName = _strengthOfTheWardSpiralThrustPool,
-                      numberToSpawn = 3,
-                    },
+                    // new StartCastBar() {
+                    //   castName = "Strength of the Ward",
+                    //   duration = _strengthOfTheWardCastDuration,
+                    // },
+                    // new WaitEvent() {
+                    //   timeToWait =
+                    //       _strengthOfTheWardCastDuration +
+                    //       _strengthOfTheWardHeavyImpactBeforeStart,
+                    // },
+                    // new ExecuteRandomEvents() {
+                    //   mechanicPoolName = _strengthOfTheWardHeavyImpactPool,
+                    // },
+                    // new ExecuteRandomEvents() {
+                    //   mechanicPoolName = _strengthOfTheWardSpiralThrustPool,
+                    //   numberToSpawn = 3,
+                    // },
                     new SpawnMechanicEvent() {
                       referenceMechanicName = _strengthOfTheWardLightningStorm,
                     },
@@ -290,7 +291,7 @@ namespace Pantheon.Mechanics {
                   events =
                       new List<MechanicEvent>() {
                         new WaitEvent() {
-                          timeToWait = _strengthOfTheWardHeavyImpactCastDuration,
+                          timeToWait = 1,  //_strengthOfTheWardHeavyImpactCastDuration,
                         },
                         new SpawnTargetedEvents() {
                           referenceMechanicName = _strengthOfTheWardLightningStormSingle,

@@ -34,6 +34,8 @@ namespace Pantheon {
     [SerializeField]
     private PlayerMovementController _playerMovementController;
 
+    private List<Aura> _auras = new List<Aura>();
+
     public override void OnNetworkSpawn() {
       base.OnNetworkSpawn();
 
@@ -53,6 +55,14 @@ namespace Pantheon {
       base.OnNetworkDespawn();
 
       GlobalContext.Instance.UnregisterPlayer(this);
+    }
+
+    public void AddAura(Aura aura) {
+      _auras.Add(aura);
+    }
+
+    public void RemoveAura(Aura aura) {
+      _auras.Remove(aura);
     }
 
     private void OnMaxHealthChanged(int previous, int current) {

@@ -17,6 +17,9 @@ namespace Pantheon {
     [SerializeField]
     private GameObject _aoeMarkerPrefab;
 
+    [SerializeField]
+    private GameObject _auraPrefab;
+
     private XivSimParser.MechanicData _mechanicData;
 
     private int _nextEnemyId = 1;
@@ -229,6 +232,15 @@ namespace Pantheon {
       foreach (NetworkPlayer target in targets) {
         MechanicContext childContext = InheritContext(mechanicContext);
         childContext.Target = target;
+
+        childContext.Position = spawnTargetedEvents.position;
+        if (spawnTargetedEvents.spawnOnTarget) {
+          childContext.Position +=
+              new Vector2(target.transform.position.x, target.transform.position.z);
+        } else if (spawnTargetedEvents.isPositionRelative) {
+          childContext.Position += mechanicContext.Position;
+        }
+
         _coroutines.Add(StartCoroutine(Execute(
             _mechanicData.referenceMechanicProperties[spawnTargetedEvents.referenceMechanicName],
             childContext)));
@@ -245,7 +257,7 @@ namespace Pantheon {
           hit.Add(player);
         }
       }
-      ApplyEffect(applyEffectToPlayers.effect, hit);
+      ApplyEffect(applyEffectToPlayers, hit);
       yield break;
     }
 
@@ -262,15 +274,39 @@ namespace Pantheon {
       yield break;
     }
 
-    private void ApplyEffect(XivSimParser.MechanicEffect effect, List<NetworkPlayer> players) {
-      if (effect is XivSimParser.DamageEffect) {
-        var damageEffect = (XivSimParser.DamageEffect)effect;
-        float damage =
-            damageEffect.damageAmount / Mathf.Min(damageEffect.maxStackAmount, players.Count);
-        foreach (NetworkPlayer player in players) {
-          player.Health -= Mathf.RoundToInt(damage);
+    private void ApplyEffect(XivSimParser.ApplyEffectToPlayers applyEffectToPlayers,
+                             List<NetworkPlayer> players) {
+      List<XivSimParser.MechanicEffect> effects = new List<XivSimParser.MechanicEffect>();
+
+      if (applyEffectToPlayers.effect != null) {
+        effects.Add(applyEffectToPlayers.effect);
+      }
+
+      if (applyEffectToPlayers.effects != null) {
+        effects.AddRange(applyEffectToPlayers.effects);
+      }
+
+      foreach (XivSimParser.MechanicEffect effect in effects) {
+        if (effect is XivSimParser.DamageEffect) {
+          var damageEffect = (XivSimParser.DamageEffect)effect;
+
+          float damage =
+              damageEffect.damageAmount / Mathf.Min(damageEffect.maxStackAmount, players.Count);
+          foreach (NetworkPlayer player in players) {
+            player.Health -= Mathf.RoundToInt(damage);
+          }
+        } else if (effect is XivSimParser.ApplyStatusEffect) {
+          var applyStatusEffect = (XivSimParser.ApplyStatusEffect)effect;
+          XivSimParser.StatusEffectData statusEffectData =
+              _mechanicData.referenceStatusProperties[applyStatusEffect.referenceStatusName];
+
+          foreach (NetworkPlayer player in players) {
+            Aura aura = Instantiate(_auraPrefab).GetComponent<Aura>();
+            aura.GetComponent<NetworkObject>().Spawn(true);
+            aura.ExpiresAt = NetworkManager.ServerTime.Time + statusEffectData.duration;
+            aura.transform.parent = player.transform;
+          }
         }
-      } else if (effect is XivSimParser.ApplyStatusEffect) {
       }
     }
 

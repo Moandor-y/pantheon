@@ -138,25 +138,6 @@
         "$type": "ExecuteMultipleEvents",
         "events": [
           {
-            "$type": "StartCastBar",
-            "castName": "Strength of the Ward",
-            "duration": 3.6833334
-          },
-          {
-            "$type": "WaitEvent",
-            "timeToWait": 10.65
-          },
-          {
-            "$type": "ExecuteRandomEvents",
-            "mechanicPoolName": "StrengthOfTheWardHeavyImpactPool",
-            "numberToSpawn": 1
-          },
-          {
-            "$type": "ExecuteRandomEvents",
-            "mechanicPoolName": "StrengthOfTheWardSpiralThrustPool",
-            "numberToSpawn": 3
-          },
-          {
             "$type": "SpawnMechanicEvent",
             "referenceMechanicName": "StrengthOfTheWardLightningStorm"
           },
@@ -390,7 +371,7 @@
         "events": [
           {
             "$type": "WaitEvent",
-            "timeToWait": 5.7
+            "timeToWait": 1.0
           },
           {
             "$type": "SpawnTargetedEvents",
