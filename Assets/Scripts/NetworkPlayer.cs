@@ -58,11 +58,24 @@ namespace Pantheon {
     }
 
     public void AddAura(Aura aura) {
-      _auras.Add(aura);
+      if (!_auras.Contains(aura)) {
+        _auras.Add(aura);
+      }
     }
 
     public void RemoveAura(Aura aura) {
-      _auras.Remove(aura);
+      if (_auras.Contains(aura)) {
+        _auras.Remove(aura);
+      }
+    }
+
+    public void ApplyDamage(float damage, string damageType) {
+      foreach (var aura in _auras) {
+        foreach (var effect in aura.Effects) {
+          damage = effect.ApplyDamage(damage, damageType);
+        }
+      }
+      Health -= Mathf.RoundToInt(damage);
     }
 
     private void OnMaxHealthChanged(int previous, int current) {

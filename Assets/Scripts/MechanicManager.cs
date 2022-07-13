@@ -293,7 +293,7 @@ namespace Pantheon {
           float damage =
               damageEffect.damageAmount / Mathf.Min(damageEffect.maxStackAmount, players.Count);
           foreach (NetworkPlayer player in players) {
-            player.Health -= Mathf.RoundToInt(damage);
+            player.ApplyDamage(damage, damageEffect.damageType);
           }
         } else if (effect is XivSimParser.ApplyStatusEffect) {
           var applyStatusEffect = (XivSimParser.ApplyStatusEffect)effect;
@@ -302,6 +302,11 @@ namespace Pantheon {
 
           foreach (NetworkPlayer player in players) {
             Aura aura = Instantiate(_auraPrefab).GetComponent<Aura>();
+            if (statusEffectData is XivSimParser.DamageModifier) {
+              var damageModifier = (XivSimParser.DamageModifier)statusEffectData;
+              aura.AddEffect(new Aura.DamageModifierEffect(damageModifier.damageType,
+                                                           damageModifier.damageMultiplier));
+            }
             aura.GetComponent<NetworkObject>().Spawn(true);
             aura.ExpiresAt = NetworkManager.ServerTime.Time + statusEffectData.duration;
             aura.transform.parent = player.transform;
