@@ -54,6 +54,19 @@ namespace Pantheon.Mechanics {
     private const float _strengthOfTheWardAscalonsMercyConcealedBeforeStart =
         8.0666666666666666666666666666667f;
 
+    private const string _strengthOfTheWardDimensionalCollapse =
+        "StrengthOfTheWardDimensionalCollapse";
+    private const string _strengthOfTheWardDimensionalCollapseSingle =
+        "StrengthOfTheWardDimensionalCollapseSingle";
+    private const string _strengthOfTheWardDimensionalCollapseSize =
+        "StrengthOfTheWardDimensionalCollapseSize";
+    private const float _strengthOfTheWardDimensionalCollapseBeforeStart =
+        5.0333333333333333333333333333333f;
+    private const float _strengthOfTheWardDimensionalCollapseCastDuration = 8.7f;
+    private const float _strengthOfTheWardDimensionalCollapseSizeInitialDelay =
+        2.9333333333333333333333333333333f;
+    private const float _strengthOfTheWardDimensionalCollapseSizeInterval = 1.025f;
+
     public static MechanicData GetMechanicData() {
       MechanicData mechanicData = new MechanicData();
       mechanicData.referenceMechanicProperties = new Dictionary<string, MechanicProperties>();
@@ -100,15 +113,15 @@ namespace Pantheon.Mechanics {
             new ExecuteMultipleEvents() {
               events =
                   new List<MechanicEvent>() {
-                    // new WaitEvent() {
-                    //   timeToWait = 8.4333333333333333333333333333333f,
-                    // },
-                    // new SpawnMechanicEvent() {
-                    //   referenceMechanicName = _ascalonsMercyConcealed,
-                    // },
-                    // new WaitEvent() {
-                    //   timeToWait = 16.5f,
-                    // },
+                    new WaitEvent() {
+                      timeToWait = 8.4333333333333333333333333333333f,
+                    },
+                    new SpawnMechanicEvent() {
+                      referenceMechanicName = _ascalonsMercyConcealed,
+                    },
+                    new WaitEvent() {
+                      timeToWait = 16.5f,
+                    },
                     new SpawnMechanicEvent() {
                       referenceMechanicName = _strengthOfTheWard,
                     },
@@ -178,22 +191,21 @@ namespace Pantheon.Mechanics {
             new ExecuteMultipleEvents() {
               events =
                   new List<MechanicEvent>() {
-                    // new StartCastBar() {
-                    //   castName = "Strength of the Ward",
-                    //   duration = _strengthOfTheWardCastDuration,
-                    // },
-                    // new WaitEvent() {
-                    //   timeToWait =
-                    //       _strengthOfTheWardCastDuration +
-                    //       _strengthOfTheWardHeavyImpactBeforeStart,
-                    // },
-                    // new ExecuteRandomEvents() {
-                    //   mechanicPoolName = _strengthOfTheWardHeavyImpactPool,
-                    // },
-                    // new ExecuteRandomEvents() {
-                    //   mechanicPoolName = _strengthOfTheWardSpiralThrustPool,
-                    //   numberToSpawn = 3,
-                    // },
+                    new StartCastBar() {
+                      castName = "Strength of the Ward",
+                      duration = _strengthOfTheWardCastDuration,
+                    },
+                    new WaitEvent() {
+                      timeToWait =
+                          _strengthOfTheWardCastDuration + _strengthOfTheWardHeavyImpactBeforeStart,
+                    },
+                    new ExecuteRandomEvents() {
+                      mechanicPoolName = _strengthOfTheWardHeavyImpactPool,
+                    },
+                    new ExecuteRandomEvents() {
+                      mechanicPoolName = _strengthOfTheWardSpiralThrustPool,
+                      numberToSpawn = 3,
+                    },
                     new SpawnMechanicEvent() {
                       referenceMechanicName = _strengthOfTheWardLightningStorm,
                     },
@@ -202,6 +214,12 @@ namespace Pantheon.Mechanics {
                     },
                     new SpawnMechanicEvent() {
                       referenceMechanicName = _ascalonsMercyConcealed,
+                    },
+                    new WaitEvent() {
+                      timeToWait = _strengthOfTheWardDimensionalCollapseBeforeStart,
+                    },
+                    new SpawnMechanicEvent() {
+                      referenceMechanicName = _strengthOfTheWardDimensionalCollapse,
                     },
                   },
             },
@@ -291,7 +309,7 @@ namespace Pantheon.Mechanics {
                   events =
                       new List<MechanicEvent>() {
                         new WaitEvent() {
-                          timeToWait = 1,  //_strengthOfTheWardHeavyImpactCastDuration,
+                          timeToWait = _strengthOfTheWardHeavyImpactCastDuration,
                         },
                         new SpawnTargetedEvents() {
                           referenceMechanicName = _strengthOfTheWardLightningStormSingle,
@@ -331,6 +349,65 @@ namespace Pantheon.Mechanics {
                       },
                 },
           };
+
+      {
+        List<MechanicEvent> events = new List<MechanicEvent>();
+        foreach (Vector2 position in new[] {
+                   new Vector2(0, 10),
+                   new Vector2(0, -10),
+                   new Vector2(10, 0),
+                   new Vector2(-10, 0),
+                   new Vector2(14, 14),
+                   new Vector2(14, -14),
+                   new Vector2(-14, 14),
+                   new Vector2(-14, -14),
+                 }) {
+          events.Add(new SpawnMechanicEvent() {
+            referenceMechanicName = _strengthOfTheWardDimensionalCollapseSingle,
+            position = position,
+          });
+        }
+        mechanicData.referenceMechanicProperties[_strengthOfTheWardDimensionalCollapse] =
+            new MechanicProperties() {
+              visible = false,
+              mechanic =
+                  new ExecuteMultipleEvents() {
+                    events = events,
+                  },
+            };
+      }
+
+      {
+        List<MechanicEvent> events = new List<MechanicEvent>() {
+          new WaitEvent() {
+            timeToWait = _strengthOfTheWardDimensionalCollapseSizeInitialDelay,
+          },
+        };
+        for (int i = 0; i < 6; ++i) {
+          string name = $"{_strengthOfTheWardDimensionalCollapseSize}{i}";
+          mechanicData.referenceMechanicProperties[name] = new MechanicProperties() {
+            collisionShapeParams = new Vector4(3 + (i + 1) * 1.5f, 360, 0, 0),
+          };
+          events.AddRange(new MechanicEvent[] {
+            new ModifyMechanicEvent() {
+              referenceMechanicName = name,
+            },
+            new WaitEvent() {
+              timeToWait = _strengthOfTheWardDimensionalCollapseSizeInterval,
+            },
+          });
+        }
+        mechanicData.referenceMechanicProperties[_strengthOfTheWardDimensionalCollapseSingle] =
+            new MechanicProperties() {
+              visible = true,
+              collisionShape = CollisionShape.Round,
+              collisionShapeParams = new Vector4(3, 360, 0, 0),
+              mechanic =
+                  new ExecuteMultipleEvents() {
+                    events = events,
+                  },
+            };
+      }
 
       mechanicData.mechanicEvents = new List<MechanicEvent>() {
         new SpawnVisualObject() {

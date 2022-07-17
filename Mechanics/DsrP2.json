@@ -55,6 +55,18 @@
         "$type": "ExecuteMultipleEvents",
         "events": [
           {
+            "$type": "WaitEvent",
+            "timeToWait": 8.433333
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "AscalonsMercyConcealed"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 16.5
+          },
+          {
             "$type": "SpawnMechanicEvent",
             "referenceMechanicName": "StrengthOfTheWard"
           },
@@ -138,6 +150,25 @@
         "$type": "ExecuteMultipleEvents",
         "events": [
           {
+            "$type": "StartCastBar",
+            "castName": "Strength of the Ward",
+            "duration": 3.6833334
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 10.65
+          },
+          {
+            "$type": "ExecuteRandomEvents",
+            "mechanicPoolName": "StrengthOfTheWardHeavyImpactPool",
+            "numberToSpawn": 1
+          },
+          {
+            "$type": "ExecuteRandomEvents",
+            "mechanicPoolName": "StrengthOfTheWardSpiralThrustPool",
+            "numberToSpawn": 3
+          },
+          {
             "$type": "SpawnMechanicEvent",
             "referenceMechanicName": "StrengthOfTheWardLightningStorm"
           },
@@ -148,6 +179,14 @@
           {
             "$type": "SpawnMechanicEvent",
             "referenceMechanicName": "AscalonsMercyConcealed"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 5.0333333
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapse"
           }
         ]
       }
@@ -371,7 +410,7 @@
         "events": [
           {
             "$type": "WaitEvent",
-            "timeToWait": 1.0
+            "timeToWait": 5.7
           },
           {
             "$type": "SpawnTargetedEvents",
@@ -418,6 +457,193 @@
           {
             "$type": "WaitEvent",
             "timeToWait": 1.0
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardDimensionalCollapse": {
+      "visible": false,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSingle",
+            "position": {
+              "x": 0.0,
+              "y": 10.0
+            }
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSingle",
+            "position": {
+              "x": 0.0,
+              "y": -10.0
+            }
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSingle",
+            "position": {
+              "x": 10.0,
+              "y": 0.0
+            }
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSingle",
+            "position": {
+              "x": -10.0,
+              "y": 0.0
+            }
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSingle",
+            "position": {
+              "x": 14.0,
+              "y": 14.0
+            }
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSingle",
+            "position": {
+              "x": 14.0,
+              "y": -14.0
+            }
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSingle",
+            "position": {
+              "x": -14.0,
+              "y": 14.0
+            }
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSingle",
+            "position": {
+              "x": -14.0,
+              "y": -14.0
+            }
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardDimensionalCollapseSize0": {
+      "collisionShapeParams": {
+        "x": 4.5,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      }
+    },
+    "StrengthOfTheWardDimensionalCollapseSize1": {
+      "collisionShapeParams": {
+        "x": 6.0,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      }
+    },
+    "StrengthOfTheWardDimensionalCollapseSize2": {
+      "collisionShapeParams": {
+        "x": 7.5,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      }
+    },
+    "StrengthOfTheWardDimensionalCollapseSize3": {
+      "collisionShapeParams": {
+        "x": 9.0,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      }
+    },
+    "StrengthOfTheWardDimensionalCollapseSize4": {
+      "collisionShapeParams": {
+        "x": 10.5,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      }
+    },
+    "StrengthOfTheWardDimensionalCollapseSize5": {
+      "collisionShapeParams": {
+        "x": 12.0,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      }
+    },
+    "StrengthOfTheWardDimensionalCollapseSingle": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 3.0,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      },
+      "visible": true,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 2.9333334
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSize0"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.025
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSize1"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.025
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSize2"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.025
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSize3"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.025
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSize4"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.025
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapseSize5"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.025
           }
         ]
       }

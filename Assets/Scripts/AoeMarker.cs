@@ -2,12 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Unity.Netcode;
 
 namespace Pantheon {
   public class AoeMarker : MonoBehaviour {
     public enum Shape {
       Round,
       Rectangle,
+    }
+
+    public struct RoundParams {
+      public float Radius;
+      public float InnerRadius;
+      public float Angle;
+    }
+
+    public struct RectangleParams {
+      public float Length;
+      public float Width;
+    }
+
+    public struct ShapeParams : INetworkSerializeByMemcpy {
+      public Shape Shape;
+      public RoundParams RoundParams;
+      public RectangleParams RectangleParams;
     }
 
     public Color TintColor {
@@ -43,6 +61,20 @@ namespace Pantheon {
     private float _prevInnerRadius = -1;
 
     private Shape _shape = Shape.Round;
+
+    public void UpdateShape(ShapeParams shapeParams) {
+      switch (shapeParams.Shape) {
+        case Shape.Round:
+          SetRound(shapeParams.RoundParams.Radius, shapeParams.RoundParams.InnerRadius,
+                   shapeParams.RoundParams.Angle);
+          break;
+        case Shape.Rectangle:
+          SetRectangle(shapeParams.RectangleParams.Length, shapeParams.RectangleParams.Width);
+          break;
+        default:
+          throw new NotImplementedException();
+      }
+    }
 
     private IEnumerator Start() {
       if (Duration == 0) {
@@ -99,7 +131,7 @@ namespace Pantheon {
       }
     }
 
-    public void SetRound(float radius, float innerRadius, float angle) {
+    private void SetRound(float radius, float innerRadius, float angle) {
       _shape = Shape.Round;
 
       _material = new Material(_roundMaterial);
@@ -110,7 +142,7 @@ namespace Pantheon {
       _material.SetFloat("_Angle", angle);
     }
 
-    public void SetRectangle(float length, float width) {
+    private void SetRectangle(float length, float width) {
       _shape = Shape.Rectangle;
 
       _material = new Material(_rectangleMaterial);

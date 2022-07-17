@@ -124,21 +124,9 @@ namespace Pantheon {
       UpdateCollision(childContext, mechanicProperties);
 
       Vector4 shapeParams = mechanicProperties.collisionShapeParams.GetValueOrDefault();
-      if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
-        SpawnRoundAoeMarkerClientRpc(
-            new Vector3(childContext.Position.x, 0, childContext.Position.y), duration,
-            radius: shapeParams.x, innerRadius: shapeParams.z, angle: shapeParams.y, visible,
-            childContext.Forward, aoeMarkerId.ToByteArray());
-      } else if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Rectangle) {
-        SpawnRectAoeMarkerClientRpc(
-            new Vector3(childContext.Position.x, 0, childContext.Position.y), duration,
-            length: shapeParams.x, width: shapeParams.y, visible, childContext.Forward,
-            aoeMarkerId.ToByteArray());
-      } else {
-        SpawnRoundAoeMarkerClientRpc(
-            new Vector3(childContext.Position.x, 0, childContext.Position.y), duration, radius: 0,
-            innerRadius: 0, angle: 0, visible, childContext.Forward, aoeMarkerId.ToByteArray());
-      }
+      SpawnAoeMarkerClientRpc(new Vector3(childContext.Position.x, 0, childContext.Position.y),
+                              duration, childContext.Collision.GetShapeParams(), visible,
+                              childContext.Forward, aoeMarkerId.ToByteArray());
 
       if (mechanicProperties.mechanic != null) {
         _coroutines.Add(StartCoroutine(Execute(mechanicProperties.mechanic, childContext)));
@@ -162,12 +150,12 @@ namespace Pantheon {
           }
         }
 
+        UpdateCollision(childContext, mechanicProperties: null);
         UpdateAoeMarkerClientRpc(
             new Vector3(childContext.Position.x, 0, childContext.Position.y),
             Quaternion.LookRotation(new Vector3(childContext.Forward.x, 0, childContext.Forward.y)),
-            childContext.Visible, aoeMarkerId.ToByteArray());
-
-        UpdateCollision(childContext, mechanicProperties);
+            childContext.Visible, childContext.Collision.GetShapeParams(),
+            aoeMarkerId.ToByteArray());
 
         yield return null;
       }
@@ -271,6 +259,9 @@ namespace Pantheon {
       if (mechanicProperties.visible.HasValue) {
         mechanicContext.Visible = mechanicProperties.visible.Value;
       }
+      if (mechanicProperties.collisionShapeParams.HasValue) {
+        UpdateCollision(mechanicContext, mechanicProperties);
+      }
       yield break;
     }
 
@@ -365,25 +356,11 @@ namespace Pantheon {
     }
 
     [ClientRpc]
-    private void SpawnRoundAoeMarkerClientRpc(Vector3 position, float duration, float radius,
-                                              float innerRadius, float angle, bool visible,
-                                              Vector2 forward, byte[] id) {
+    private void SpawnAoeMarkerClientRpc(Vector3 position, float duration,
+                                         AoeMarker.ShapeParams shapeParams, bool visible,
+                                         Vector2 forward, byte[] id) {
       AoeMarker aoeMarker = Instantiate(_aoeMarkerPrefab).GetComponent<AoeMarker>();
-      aoeMarker.SetRound(radius, innerRadius, angle);
-      aoeMarker.transform.position = position;
-      aoeMarker.transform.rotation =
-          Quaternion.LookRotation(new Vector3(forward.x, 0, forward.y), Vector3.up);
-      aoeMarker.Duration = duration;
-      aoeMarker.Visible = visible;
-      _aoeMarkers[new Guid(id)] = aoeMarker;
-    }
-
-    [ClientRpc]
-    private void SpawnRectAoeMarkerClientRpc(Vector3 position, float duration, float length,
-                                             float width, bool visible, Vector2 forward,
-                                             byte[] id) {
-      AoeMarker aoeMarker = Instantiate(_aoeMarkerPrefab).GetComponent<AoeMarker>();
-      aoeMarker.SetRectangle(length, width);
+      aoeMarker.UpdateShape(shapeParams);
       aoeMarker.transform.position = position;
       aoeMarker.transform.rotation =
           Quaternion.LookRotation(new Vector3(forward.x, 0, forward.y), Vector3.up);
@@ -394,21 +371,34 @@ namespace Pantheon {
 
     [ClientRpc]
     private void UpdateAoeMarkerClientRpc(Vector3 position, Quaternion rotation, bool visible,
-                                          byte[] id) {
+                                          AoeMarker.ShapeParams shapeParams, byte[] id) {
       var aoeMarker = _aoeMarkers[new Guid(id)];
       aoeMarker.transform.position = position;
       aoeMarker.transform.rotation = rotation;
       aoeMarker.Visible = visible;
+      aoeMarker.UpdateShape(shapeParams);
     }
 
     private void UpdateCollision(MechanicContext mechanicContext,
                                  XivSimParser.MechanicProperties mechanicProperties) {
-      if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
-        Vector4 shapeParams = mechanicProperties.collisionShapeParams.GetValueOrDefault();
-        mechanicContext.Collision = new RoundCollision(
-            mechanicContext.Position, direction: mechanicContext.Forward, radius: shapeParams.x,
-            innerRadius: shapeParams.z, angle: shapeParams.y);
+      if (mechanicProperties != null) {
+        if (mechanicProperties.collisionShape.HasValue) {
+          if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Round) {
+            mechanicContext.Collision = new RoundCollision();
+          } else if (mechanicProperties.collisionShape == XivSimParser.CollisionShape.Rectangle) {
+            mechanicContext.Collision = new RectangleCollision();
+          } else {
+            throw new NotImplementedException();
+          }
+        }
+
+        if (mechanicProperties.collisionShapeParams.HasValue) {
+          mechanicContext.Collision.UpdateXivSimParams(
+              mechanicProperties.collisionShapeParams.Value);
+        }
       }
+
+      mechanicContext.Collision.UpdateTransform(mechanicContext.Position, mechanicContext.Forward);
     }
 
     private void ShuffleList<T>(List<T> list) {
@@ -422,10 +412,14 @@ namespace Pantheon {
 
     private static MechanicContext InheritContext(MechanicContext parent) {
       return new MechanicContext() {
-        Parent = parent,        Visible = false,
-        Source = parent.Source, Position = parent.Position,
-        Collision = null,       Target = parent.Target,
-        IsTargeted = false,     Forward = parent.Forward,
+        Parent = parent,
+        Visible = false,
+        Source = parent.Source,
+        Position = parent.Position,
+        Collision = new RoundCollision(),
+        Target = parent.Target,
+        IsTargeted = false,
+        Forward = parent.Forward,
       };
     }
 
@@ -445,30 +439,97 @@ namespace Pantheon {
     }
 
     private interface ICollision {
+      public void UpdateTransform(Vector2 position, Vector2 forward);
+      public void UpdateXivSimParams(Vector4 xivSimParams);
       public bool CollidesWith(Vector2 position);
+      public AoeMarker.ShapeParams GetShapeParams();
     }
 
     private class RoundCollision : ICollision {
       private Vector2 _position;
-      private Vector2 _direction;
+      private Vector2 _forward = Vector2.up;
       private float _radius;
       private float _innerRadius;
       private float _angle;
 
-      public RoundCollision(Vector2 position, Vector2 direction, float radius, float innerRadius,
-                            float angle) {
+      public void UpdateTransform(Vector2 position, Vector2 forward) {
         _position = position;
-        _direction = direction;
-        _radius = radius;
-        _innerRadius = innerRadius;
-        _angle = angle;
+        _forward = forward;
+      }
+
+      public void UpdateXivSimParams(Vector4 xivSimParams) {
+        _radius = xivSimParams.x;
+        _innerRadius = xivSimParams.z;
+        _angle = xivSimParams.y;
       }
 
       public bool CollidesWith(Vector2 position) {
         Vector2 diff = position - _position;
         bool distance = _innerRadius <= diff.magnitude && diff.magnitude <= _radius;
-        bool angle = (diff == Vector2.zero) || Vector2.Angle(diff, _direction) <= _angle / 2;
+        bool angle = (diff == Vector2.zero) || Vector2.Angle(diff, _forward) <= _angle / 2;
         return distance && angle;
+      }
+
+      public AoeMarker.ShapeParams GetShapeParams() {
+        return new AoeMarker.ShapeParams() {
+          Shape = AoeMarker.Shape.Round,
+          RoundParams =
+              new AoeMarker.RoundParams() {
+                Radius = _radius,
+                InnerRadius = _innerRadius,
+                Angle = _angle,
+              },
+        };
+      }
+    }
+
+    private class RectangleCollision : ICollision {
+      private Vector2 _position;
+      private Vector2 _forward = Vector2.up;
+      private float _length;
+      private float _width;
+
+      public void UpdateTransform(Vector2 position, Vector2 forward) {
+        _position = position;
+        _forward = forward;
+      }
+
+      public void UpdateXivSimParams(Vector4 xivSimParams) {
+        _length = xivSimParams.x;
+        _width = xivSimParams.y;
+      }
+
+      public AoeMarker.ShapeParams GetShapeParams() {
+        return new AoeMarker.ShapeParams() {
+          Shape = AoeMarker.Shape.Rectangle,
+          RectangleParams =
+              new AoeMarker.RectangleParams() {
+                Length = _length,
+                Width = _width,
+              },
+        };
+      }
+
+      public bool CollidesWith(Vector2 position) {
+        List<Vector2> vertices = new List<Vector2>();
+        vertices.Add(_position + _width / 2 * Rotate(_forward, -90));
+        vertices.Add(vertices[0] + _length * _forward);
+        vertices.Add(vertices[1] + _width * Rotate(_forward, 90));
+        vertices.Add(vertices[2] - _length * _forward);
+        for (int i = 0; i < 4; ++i) {
+          if (Cross(vertices[(i + 1) % 4] - vertices[i], position - vertices[i]) < 0) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      private float Cross(Vector2 lhs, Vector2 rhs) {
+        return Vector3.Cross(new Vector3(lhs.x, lhs.y, 0), new Vector3(rhs.x, rhs.y, 0)).z;
+      }
+
+      private Vector2 Rotate(Vector2 v, float angle) {
+        return Quaternion.Euler(0, 0, angle) * new Vector3(v.x, v.y, 0);
       }
     }
   }
