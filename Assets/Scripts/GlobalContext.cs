@@ -5,7 +5,7 @@ using System;
 using System.Collections.ObjectModel;
 
 namespace Pantheon {
-  class GlobalContext : Singleton<GlobalContext> {
+  public class GlobalContext : Singleton<GlobalContext> {
     public string MechanicPath { get; set; }
 
     public ReadOnlyCollection<NetworkPlayer> Players {
