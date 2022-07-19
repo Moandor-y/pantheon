@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 
 namespace Pantheon {
   public class GlobalContext : Singleton<GlobalContext> {
+    public const float MaxMoveSpeed = 6;
+
     public string MechanicPath { get; set; }
 
     public ReadOnlyCollection<NetworkPlayer> Players {

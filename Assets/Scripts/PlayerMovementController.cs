@@ -14,8 +14,6 @@ namespace Pantheon {
     private float _moveHorizontal;
     private float _moveVertical;
 
-    private Vector3 _moveDirection;
-
     private void Start() {
       cameraController = CameraController.Instance;
       cameraController.Player = gameObject;
@@ -29,15 +27,13 @@ namespace Pantheon {
 
       Vector3 forward = Vector3.ProjectOnPlane(cameraController.transform.forward, Vector3.up);
       Vector3 right = Vector3.ProjectOnPlane(cameraController.transform.right, Vector3.up);
-      _moveDirection = (forward * _moveVertical + right * _moveHorizontal).normalized;
+      Vector3 moveDirection = (forward * _moveVertical + right * _moveHorizontal).normalized;
 
       if (moveState != MoveState.Idle) {
         transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
       }
-    }
 
-    private void FixedUpdate() {
-      transform.position += GetMoveSpeed() * Time.fixedDeltaTime * _moveDirection;
+      transform.position += GetMoveSpeed() * Time.deltaTime * moveDirection;
     }
 
     private void UpdateMoveState() {
@@ -79,6 +75,6 @@ namespace Pantheon {
 
     private const float _moveAxisThreashold = 0.5f;
     private const float _moveStartingDuration = 0.2f;
-    private const float _maxMoveSpeed = 6;
+    private const float _maxMoveSpeed = GlobalContext.MaxMoveSpeed;
   }
 }

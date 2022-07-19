@@ -1,0 +1,146 @@
+{
+  "referenceMechanicProperties": {
+    "MechanicArenaBoundary": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 100.0,
+        "y": 360.0,
+        "z": 23.415,
+        "w": 0.0
+      },
+      "visible": true,
+      "persistentTickInterval": 0.2,
+      "persistentMechanic": {
+        "$type": "ApplyEffectToPlayers",
+        "affectLivingOnly": true,
+        "effect": {
+          "$type": "DamageEffect",
+          "damageAmount": 9999999.0,
+          "maxStackAmount": 1
+        }
+      }
+    },
+    "DelayedProtean": {
+      "mechanic": {
+        "$type": "SpawnTargetedEvents",
+        "targetingScheme": {
+          "$type": "TargetAllPlayers",
+          "targetLivingOnly": true
+        },
+        "referenceMechanicName": "DelayedProteanTargeted"
+      }
+    },
+    "DelayedProteanTargeted": {
+      "isTargeted": true,
+      "followSpeed": 0.0,
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 100.0,
+        "y": 24.0,
+        "z": 0.0,
+        "w": 0.0
+      },
+      "colorHtml": "#ff0000",
+      "visible": false,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.0
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "MechanicNonTargeted"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.0
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "MechanicVisible"
+          },
+          {
+            "$type": "ApplyEffectToPlayers",
+            "affectLivingOnly": true,
+            "effect": {
+              "$type": "DamageEffect",
+              "damageAmount": 100000.0,
+              "maxStackAmount": 1
+            }
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.0
+          }
+        ]
+      }
+    },
+    "MechanicVisible": {
+      "visible": true
+    },
+    "MechanicNonTargeted": {
+      "isTargeted": false
+    },
+    "SpawnBoss": {
+      "visible": false,
+      "mechanic": {
+        "$type": "SpawnEnemy",
+        "enemyName": "Boss",
+        "textureFilePath": "Mechanics/Resources/Thordan.png",
+        "colorHtml": "#000000",
+        "maxHp": 1000000,
+        "baseMoveSpeed": 2.0,
+        "hitboxSize": 3.0,
+        "isTargetable": true,
+        "visualPosition": {
+          "x": 0.0,
+          "y": 2.0,
+          "z": 0.0
+        },
+        "visualScale": {
+          "x": 4.0,
+          "y": 4.0,
+          "z": 4.0
+        },
+        "referenceMechanicName": "DelayedProtean"
+      }
+    }
+  },
+  "referenceTetherProperties": {},
+  "mechanicPools": {},
+  "referenceStatusProperties": {},
+  "mechanicEvents": [
+    {
+      "$type": "SpawnVisualObject",
+      "textureFilePath": "Mechanics/Resources/ArenaCircle.png",
+      "relativePosition": {
+        "x": 0.0,
+        "y": -0.001,
+        "z": 0.0
+      },
+      "eulerAngles": {
+        "x": 90.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 46.83,
+        "y": 46.83,
+        "z": 1.0
+      },
+      "colorHtml": "#000000",
+      "visualDuration": "Infinity"
+    },
+    {
+      "$type": "SpawnMechanicEvent",
+      "referenceMechanicName": "SpawnBoss"
+    },
+    {
+      "$type": "SpawnMechanicEvent",
+      "referenceMechanicName": "MechanicArenaBoundary"
+    }
+  ],
+  "defaultHealth": 50000
+}
