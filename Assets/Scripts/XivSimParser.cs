@@ -185,6 +185,18 @@ namespace Pantheon {
       public List<int> targetIds;
     }
 
+    public class TargetSpecificPlayerIdsByClass : TargetingScheme {
+      public List<int> targetIds;
+      public PlayerClassType classType;
+      public bool invertCheck;
+    }
+
+    public enum PlayerClassType {
+      Tank,
+      Healer,
+      Dps,
+    }
+
     public class TargetAllPlayers : TargetingScheme {}
 
     public class TetherProperties {}

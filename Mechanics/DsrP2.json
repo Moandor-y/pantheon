@@ -55,18 +55,6 @@
         "$type": "ExecuteMultipleEvents",
         "events": [
           {
-            "$type": "WaitEvent",
-            "timeToWait": 8.433333
-          },
-          {
-            "$type": "SpawnMechanicEvent",
-            "referenceMechanicName": "AscalonsMercyConcealed"
-          },
-          {
-            "$type": "WaitEvent",
-            "timeToWait": 16.5
-          },
-          {
             "$type": "SpawnMechanicEvent",
             "referenceMechanicName": "StrengthOfTheWard"
           },
@@ -150,43 +138,8 @@
         "$type": "ExecuteMultipleEvents",
         "events": [
           {
-            "$type": "StartCastBar",
-            "castName": "Strength of the Ward",
-            "duration": 3.6833334
-          },
-          {
-            "$type": "WaitEvent",
-            "timeToWait": 10.65
-          },
-          {
-            "$type": "ExecuteRandomEvents",
-            "mechanicPoolName": "StrengthOfTheWardHeavyImpactPool",
-            "numberToSpawn": 1
-          },
-          {
-            "$type": "ExecuteRandomEvents",
-            "mechanicPoolName": "StrengthOfTheWardSpiralThrustPool",
-            "numberToSpawn": 3
-          },
-          {
             "$type": "SpawnMechanicEvent",
-            "referenceMechanicName": "StrengthOfTheWardLightningStorm"
-          },
-          {
-            "$type": "WaitEvent",
-            "timeToWait": 8.066667
-          },
-          {
-            "$type": "SpawnMechanicEvent",
-            "referenceMechanicName": "AscalonsMercyConcealed"
-          },
-          {
-            "$type": "WaitEvent",
-            "timeToWait": 5.0333333
-          },
-          {
-            "$type": "SpawnMechanicEvent",
-            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapse"
+            "referenceMechanicName": "StrengthOfTheWardTheDragonsRage"
           }
         ]
       }
@@ -647,6 +600,95 @@
           }
         ]
       }
+    },
+    "StrengthOfTheWardTheDragonsRage": {
+      "visible": false,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "ReshufflePlayerIds"
+          },
+          {
+            "$type": "SpawnTargetedEvents",
+            "targetingScheme": {
+              "$type": "TargetSpecificPlayerIdsByClass",
+              "targetIds": [
+                0,
+                1,
+                2
+              ],
+              "invertCheck": true,
+              "targetLivingOnly": true
+            },
+            "referenceMechanicName": "StrengthOfTheWardTheDragonsRageSkywardLeap",
+            "spawnOnTarget": true
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardTheDragonsRageSkywardLeap": {
+      "isTargeted": true,
+      "followSpeed": 100.0,
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 10.0,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      },
+      "visible": false,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "SpawnVisualObject",
+            "textureFilePath": "Mechanics/Resources/DefamationMarker.png",
+            "relativePosition": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            },
+            "scale": {
+              "x": 1.0,
+              "y": 1.0,
+              "z": 1.0
+            },
+            "colorHtml": "#0000ff",
+            "spawnOnPlayer": true,
+            "isBillboard": true,
+            "visualDuration": 8.7
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 8.7
+          },
+          {
+            "$type": "ModifyMechanicEvent",
+            "referenceMechanicName": "MechanicVisible"
+          },
+          {
+            "$type": "ApplyEffectToPlayers",
+            "affectLivingOnly": true,
+            "effects": [
+              {
+                "$type": "DamageEffect",
+                "damageType": "Physical",
+                "damageAmount": 1.0,
+                "maxStackAmount": 1
+              },
+              {
+                "$type": "ApplyStatusEffect",
+                "referenceStatusName": "SkywardLeapVuln"
+              }
+            ]
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 0.5
+          }
+        ]
+      }
     }
   },
   "mechanicPools": {
@@ -763,6 +805,16 @@
       "statusName": "LightningStormVuln",
       "statusDescription": "Lightning Resistance Down II",
       "duration": 3.0,
+      "spreadDistance": -1.0
+    },
+    "SkywardLeapVuln": {
+      "$type": "DamageModifier",
+      "damageMultiplier": 100000.0,
+      "damageType": "Physical",
+      "statusIconPath": "Mechanics/Resources/PhysicalVuln.png",
+      "statusName": "SkywardLeapVuln",
+      "statusDescription": "Lightning Resistance Down II",
+      "duration": 6.0,
       "spreadDistance": -1.0
     }
   },

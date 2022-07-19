@@ -15,6 +15,10 @@ namespace Pantheon.Mechanics {
     private const string _statusLightningStormVuln = "LightningStormVuln";
     private const string _statusLightningStormVulnName = "Lightning Resistance Down II";
 
+    private const string _statusSkywardLeapVuln = "SkywardLeapVuln";
+    private const string _statusSkywardLeapVulnName = "Physical Vulnerability Up";
+
+    private const string _damageTypePhysical = "Physical";
     private const string _damageTypeLightning = "Lightning";
 
     private const float _damageMultiplier = 100000;
@@ -67,6 +71,12 @@ namespace Pantheon.Mechanics {
         2.9333333333333333333333333333333f;
     private const float _strengthOfTheWardDimensionalCollapseSizeInterval = 1.025f;
 
+    private const string _strengthOfTheWardTheDragonsRage = "StrengthOfTheWardTheDragonsRage";
+    private const string _strengthOfTheWardTheDragonsRageSkywardLeap =
+        "StrengthOfTheWardTheDragonsRageSkywardLeap";
+    private const float _strengthOfTheWardTheDragonsRageSkywardLeapRadius = 10;
+    private const float _strengthOfTheWardTheDragonsRageSkywardLeapEffectDuration = 0.5f;
+
     public static MechanicData GetMechanicData() {
       MechanicData mechanicData = new MechanicData();
       mechanicData.referenceMechanicProperties = new Dictionary<string, MechanicProperties>();
@@ -113,15 +123,15 @@ namespace Pantheon.Mechanics {
             new ExecuteMultipleEvents() {
               events =
                   new List<MechanicEvent>() {
-                    new WaitEvent() {
-                      timeToWait = 8.4333333333333333333333333333333f,
-                    },
-                    new SpawnMechanicEvent() {
-                      referenceMechanicName = _ascalonsMercyConcealed,
-                    },
-                    new WaitEvent() {
-                      timeToWait = 16.5f,
-                    },
+                    // new WaitEvent() {
+                    //   timeToWait = 8.4333333333333333333333333333333f,
+                    // },
+                    // new SpawnMechanicEvent() {
+                    //   referenceMechanicName = _ascalonsMercyConcealed,
+                    // },
+                    // new WaitEvent() {
+                    //   timeToWait = 16.5f,
+                    // },
                     new SpawnMechanicEvent() {
                       referenceMechanicName = _strengthOfTheWard,
                     },
@@ -191,35 +201,39 @@ namespace Pantheon.Mechanics {
             new ExecuteMultipleEvents() {
               events =
                   new List<MechanicEvent>() {
-                    new StartCastBar() {
-                      castName = "Strength of the Ward",
-                      duration = _strengthOfTheWardCastDuration,
-                    },
-                    new WaitEvent() {
-                      timeToWait =
-                          _strengthOfTheWardCastDuration + _strengthOfTheWardHeavyImpactBeforeStart,
-                    },
-                    new ExecuteRandomEvents() {
-                      mechanicPoolName = _strengthOfTheWardHeavyImpactPool,
-                    },
-                    new ExecuteRandomEvents() {
-                      mechanicPoolName = _strengthOfTheWardSpiralThrustPool,
-                      numberToSpawn = 3,
-                    },
+                    // new StartCastBar() {
+                    //   castName = "Strength of the Ward",
+                    //   duration = _strengthOfTheWardCastDuration,
+                    // },
+                    // new WaitEvent() {
+                    //   timeToWait =
+                    //       _strengthOfTheWardCastDuration +
+                    //       _strengthOfTheWardHeavyImpactBeforeStart,
+                    // },
+                    // new ExecuteRandomEvents() {
+                    //   mechanicPoolName = _strengthOfTheWardHeavyImpactPool,
+                    // },
+                    // new ExecuteRandomEvents() {
+                    //   mechanicPoolName = _strengthOfTheWardSpiralThrustPool,
+                    //   numberToSpawn = 3,
+                    // },
+                    // new SpawnMechanicEvent() {
+                    //   referenceMechanicName = _strengthOfTheWardLightningStorm,
+                    // },
+                    // new WaitEvent() {
+                    //   timeToWait = _strengthOfTheWardAscalonsMercyConcealedBeforeStart,
+                    // },
+                    // new SpawnMechanicEvent() {
+                    //   referenceMechanicName = _ascalonsMercyConcealed,
+                    // },
+                    // new WaitEvent() {
+                    //   timeToWait = _strengthOfTheWardDimensionalCollapseBeforeStart,
+                    // },
+                    // new SpawnMechanicEvent() {
+                    //   referenceMechanicName = _strengthOfTheWardDimensionalCollapse,
+                    // },
                     new SpawnMechanicEvent() {
-                      referenceMechanicName = _strengthOfTheWardLightningStorm,
-                    },
-                    new WaitEvent() {
-                      timeToWait = _strengthOfTheWardAscalonsMercyConcealedBeforeStart,
-                    },
-                    new SpawnMechanicEvent() {
-                      referenceMechanicName = _ascalonsMercyConcealed,
-                    },
-                    new WaitEvent() {
-                      timeToWait = _strengthOfTheWardDimensionalCollapseBeforeStart,
-                    },
-                    new SpawnMechanicEvent() {
-                      referenceMechanicName = _strengthOfTheWardDimensionalCollapse,
+                      referenceMechanicName = _strengthOfTheWardTheDragonsRage,
                     },
                   },
             },
@@ -409,6 +423,74 @@ namespace Pantheon.Mechanics {
             };
       }
 
+      mechanicData.referenceMechanicProperties[_strengthOfTheWardTheDragonsRage] =
+          new MechanicProperties() {
+            visible = false,
+            mechanic =
+                new ExecuteMultipleEvents() {
+                  events =
+                      new List<MechanicEvent>() {
+                        new ReshufflePlayerIds(),
+                        new SpawnTargetedEvents() {
+                          targetingScheme =
+                              new TargetSpecificPlayerIdsByClass() {
+                                classType = PlayerClassType.Tank,
+                                invertCheck = true,
+                                targetIds = new List<int>() { 0, 1, 2 },
+                              },
+                          referenceMechanicName = _strengthOfTheWardTheDragonsRageSkywardLeap,
+                          spawnOnTarget = true,
+                        },
+                      },
+                },
+          };
+
+      mechanicData.referenceMechanicProperties[_strengthOfTheWardTheDragonsRageSkywardLeap] =
+          new MechanicProperties() {
+            visible = false,
+            isTargeted = true,
+            followSpeed = 100,
+            collisionShape = CollisionShape.Round,
+            collisionShapeParams =
+                new Vector4(_strengthOfTheWardTheDragonsRageSkywardLeapRadius, 360, 0, 0),
+            mechanic =
+                new ExecuteMultipleEvents() {
+                  events =
+                      new List<MechanicEvent>() {
+                        new SpawnVisualObject() {
+                          textureFilePath = "Mechanics/Resources/DefamationMarker.png",
+                          relativePosition = new Vector3(0, 1, 0),
+                          scale = new Vector3(1, 1, 1),
+                          colorHtml = "#0000ff",
+                          spawnOnPlayer = true,
+                          isBillboard = true,
+                          visualDuration = _strengthOfTheWardDimensionalCollapseCastDuration,
+                        },
+                        new WaitEvent() {
+                          timeToWait = _strengthOfTheWardDimensionalCollapseCastDuration,
+                        },
+                        new ModifyMechanicEvent() {
+                          referenceMechanicName = _mechanicVisible,
+                        },
+                        new ApplyEffectToPlayers() {
+                          effects =
+                              new List<MechanicEffect>() {
+                                new DamageEffect() {
+                                  damageAmount = 1,
+                                  damageType = _damageTypePhysical,
+                                },
+                                new ApplyStatusEffect() {
+                                  referenceStatusName = _statusSkywardLeapVuln,
+                                },
+                              },
+                        },
+                        new WaitEvent() {
+                          timeToWait = _strengthOfTheWardTheDragonsRageSkywardLeapEffectDuration,
+                        },
+                      },
+                },
+          };
+
       mechanicData.mechanicEvents = new List<MechanicEvent>() {
         new SpawnVisualObject() {
           textureFilePath = "Mechanics/Resources/ArenaCircle.png",
@@ -458,7 +540,16 @@ namespace Pantheon.Mechanics {
             statusDescription = _statusLightningStormVulnName,
             duration = 3,
             statusIconPath = "Mechanics/Resources/LightningVuln.png",
-          } }
+          } },
+        { _statusSkywardLeapVuln,
+          new DamageModifier() {
+            damageMultiplier = _damageMultiplier,
+            damageType = _damageTypePhysical,
+            statusName = _statusSkywardLeapVuln,
+            statusDescription = _statusLightningStormVulnName,
+            duration = 6,
+            statusIconPath = "Mechanics/Resources/PhysicalVuln.png",
+          } },
       };
 
       return mechanicData;
