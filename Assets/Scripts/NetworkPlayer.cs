@@ -8,6 +8,15 @@ using Unity.Collections;
 namespace Pantheon {
   [DisallowMultipleComponent]
   public class NetworkPlayer : NetworkBehaviour {
+    public enum Class {
+      Tank,
+      Healer,
+      Dps,
+    }
+    ;
+
+    public Class PlayerClass;
+
     public int Health {
       get { return _health.Value; }
 

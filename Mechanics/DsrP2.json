@@ -614,7 +614,7 @@
             "targetingScheme": {
               "$type": "TargetSpecificPlayerIdsByClass",
               "targetIds": [
-                0,
+                3,
                 1,
                 2
               ],

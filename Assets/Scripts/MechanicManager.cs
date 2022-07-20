@@ -79,8 +79,7 @@ namespace Pantheon {
 
     private IEnumerator Execute(XivSimParser.SpawnVisualObject spawnVisualObject,
                                 MechanicContext mechanicContext) {
-      SpawnVisualObjectClientRpc(visible: mechanicContext.Visible,
-                                 texturePath: spawnVisualObject.textureFilePath,
+      SpawnVisualObjectClientRpc(texturePath: spawnVisualObject.textureFilePath,
                                  position: spawnVisualObject.relativePosition,
                                  rotation: Quaternion.Euler(spawnVisualObject.eulerAngles),
                                  scale: spawnVisualObject.scale);
@@ -216,7 +215,8 @@ namespace Pantheon {
 
     private IEnumerator Execute(XivSimParser.SpawnTargetedEvents spawnTargetedEvents,
                                 MechanicContext mechanicContext) {
-      List<NetworkPlayer> targets = TargetPlayers(spawnTargetedEvents.targetingScheme);
+      List<NetworkPlayer> targets =
+          spawnTargetedEvents.targetingScheme.TargetPlayers(_players.AsReadOnly());
       foreach (NetworkPlayer target in targets) {
         MechanicContext childContext = InheritContext(mechanicContext);
         childContext.Target = target;
@@ -306,21 +306,6 @@ namespace Pantheon {
       }
     }
 
-    private List<NetworkPlayer> TargetPlayers(XivSimParser.TargetingScheme targetingScheme) {
-      List<NetworkPlayer> result = new List<NetworkPlayer>();
-      if (targetingScheme is XivSimParser.TargetSpecificPlayerIds) {
-        var targetSpecificPlayerIds = (XivSimParser.TargetSpecificPlayerIds)targetingScheme;
-        foreach (int id in targetSpecificPlayerIds.targetIds) {
-          result.Add(_players[id % _players.Count]);
-        }
-      } else if (targetingScheme is XivSimParser.TargetAllPlayers) {
-        result.AddRange(_players);
-      } else {
-        throw new NotImplementedException();
-      }
-      return result;
-    }
-
     private float GetDuration(XivSimParser.MechanicEvent mechanicEvent) {
       Assert.IsNotNull(mechanicEvent);
 
@@ -343,10 +328,9 @@ namespace Pantheon {
     }
 
     [ClientRpc]
-    private void SpawnVisualObjectClientRpc(bool visible, string texturePath, Vector3 position,
+    private void SpawnVisualObjectClientRpc(string texturePath, Vector3 position,
                                             Quaternion rotation, Vector3 scale) {
       GameObject spawned = Instantiate(_visualObjectPrefab);
-      spawned.GetComponent<MeshRenderer>().enabled = visible;
       Texture2D texture = new Texture2D(2, 2);
       texture.LoadImage(File.ReadAllBytes(texturePath));
       spawned.GetComponent<MeshRenderer>().material.mainTexture = texture;

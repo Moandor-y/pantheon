@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using Newtonsoft.Json.UnityConverters.Math;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Pantheon {
   public static class XivSimParser {
@@ -179,91 +181,136 @@ namespace Pantheon {
       [DefaultValue(true)]
       [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
       public bool targetLivingOnly = true;
+
+      public abstract List<NetworkPlayer> TargetPlayers(ReadOnlyCollection<NetworkPlayer> players);
     }
 
     public class TargetSpecificPlayerIds : TargetingScheme {
       public List<int> targetIds;
+
+      public override List<NetworkPlayer> TargetPlayers(ReadOnlyCollection<NetworkPlayer> players) {
+        List<NetworkPlayer> result = new List<NetworkPlayer>();
+        foreach (int id in targetIds) {
+          result.Add(players[id % players.Count]);
+        }
+        return result;
+      }
     }
 
     public class TargetSpecificPlayerIdsByClass : TargetingScheme {
       public List<int> targetIds;
       public PlayerClassType classType;
       public bool invertCheck;
-    }
 
-    public enum PlayerClassType {
-      Tank,
-      Healer,
-      Dps,
-    }
-
-    public class TargetAllPlayers : TargetingScheme {}
-
-    public class TetherProperties {}
-
-    public enum CollisionShape { Round, Rectangle }
-
-    public class StatusEffectData {
-      public bool beneficial;
-      public string statusIconPath;
-      public string statusName;
-      public string statusDescription;
-
-      [DefaultValue(DisableType.None)]
-      public DisableType disableType;
-
-      public float duration;
-      public float tickInterval;
-      public bool shouldKeepOnDeath;
-      public bool trueStatus;
-
-      [DefaultValue(-1)]
-      public float spreadDistance = -1;
-
-      [DefaultValue(true)]
-      public bool forceExpireOnPlayerDeath = true;
-
-      [DefaultValue(1)]
-      public int maxStacks = 1;
-
-      [DefaultValue(true)]
-      public bool canOverwriteStatus = true;
-
-      public bool allowDuplicates;
-    }
-
-    public enum DisableType {
-      None = 0,
-      Movement = 1,
-      Actions = 1 << 1,
-      Knockback = 1 << 2,
-      Damage = 1 << 3,
-      Statuses = 1 << 4,
-    }
-
-    public class DamageModifier : StatusEffectData {
-      public float damageMultiplier;
-      public string damageType;
-    }
-
-    public abstract class Condition {}
-
-    public class TypeBinder : ISerializationBinder {
-      public Type BindToType(string assemblyName, string typeName) {
-        return Type.GetType($"Pantheon.XivSimParser+{typeName}");
+      public override List<NetworkPlayer> TargetPlayers(ReadOnlyCollection<NetworkPlayer> players) {
+              List<NetworkPlayer> ordered = new List<NetworkPlayer>(players.OrderBy(player => {
+                if ((player.PlayerClass.ToClassType() == classType) ^ invertCheck) {
+                  return 0;
       }
-
-      public void BindToName(Type serializedType, out string assemblyName, out string typeName) {
-        assemblyName = null;
-        typeName = serializedType.Name;
+      else {
+        return 1;
       }
+    }));
+    List<NetworkPlayer> result = new List<NetworkPlayer>();
+    foreach (int id in targetIds) {
+      result.Add(ordered[id % ordered.Count]);
     }
+    return result;
+  }
+}
 
-    public static MechanicData Parse(string json) {
-      return JsonConvert.DeserializeObject<MechanicData>(json, new JsonSerializerSettings() {
-        SerializationBinder = new TypeBinder(),
-        TypeNameHandling = TypeNameHandling.All,
-      });
+public enum PlayerClassType {
+  Tank,
+  Healer,
+  Dps,
+}
+
+public class TargetAllPlayers : TargetingScheme {
+  public override List<NetworkPlayer> TargetPlayers(ReadOnlyCollection<NetworkPlayer> players) {
+    return new List<NetworkPlayer>(players);
+  }
+}
+
+public class TetherProperties {}
+
+public enum CollisionShape { Round, Rectangle }
+
+public class StatusEffectData {
+  public bool beneficial;
+  public string statusIconPath;
+  public string statusName;
+  public string statusDescription;
+
+  [DefaultValue(DisableType.None)]
+  public DisableType disableType;
+
+  public float duration;
+  public float tickInterval;
+  public bool shouldKeepOnDeath;
+  public bool trueStatus;
+
+  [DefaultValue(-1)]
+  public float spreadDistance = -1;
+
+  [DefaultValue(true)]
+  public bool forceExpireOnPlayerDeath = true;
+
+  [DefaultValue(1)]
+  public int maxStacks = 1;
+
+  [DefaultValue(true)]
+  public bool canOverwriteStatus = true;
+
+  public bool allowDuplicates;
+}
+
+public enum DisableType {
+  None = 0,
+  Movement = 1,
+  Actions = 1 << 1,
+  Knockback = 1 << 2,
+  Damage = 1 << 3,
+  Statuses = 1 << 4,
+}
+
+public class DamageModifier : StatusEffectData {
+  public float damageMultiplier;
+  public string damageType;
+}
+
+public abstract class Condition {}
+
+public class TypeBinder : ISerializationBinder {
+  public Type BindToType(string assemblyName, string typeName) {
+    return Type.GetType($"Pantheon.XivSimParser+{typeName}");
+  }
+
+  public void BindToName(Type serializedType, out string assemblyName, out string typeName) {
+    assemblyName = null;
+    typeName = serializedType.Name;
+  }
+}
+
+public static MechanicData Parse(string json) {
+  return JsonConvert.DeserializeObject<MechanicData>(json, new JsonSerializerSettings() {
+    SerializationBinder = new TypeBinder(),
+    TypeNameHandling = TypeNameHandling.All,
+  });
+}
+}
+
+static class PlayerClassExtensions {
+  public static XivSimParser.PlayerClassType ToClassType(this NetworkPlayer.Class playerClass) {
+    switch (playerClass) {
+      case NetworkPlayer.Class.Tank:
+        return XivSimParser.PlayerClassType.Tank;
+      case NetworkPlayer.Class.Healer:
+        return XivSimParser.PlayerClassType.Healer;
+      case NetworkPlayer.Class.Dps:
+        return XivSimParser.PlayerClassType.Dps;
+      default:
+        throw new NotImplementedException();
     }
   }
+}
 }
