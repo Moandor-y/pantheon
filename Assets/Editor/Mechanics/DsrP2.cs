@@ -77,6 +77,13 @@ namespace Pantheon.Mechanics {
     private const float _strengthOfTheWardTheDragonsRageSkywardLeapRadius = 10;
     private const float _strengthOfTheWardTheDragonsRageSkywardLeapEffectDuration = 0.5f;
 
+    private const string _strengthOfTheWardHolyShieldBash = "StrengthOfTheWardHolyShieldBash";
+    private const string _strengthOfTheWardHolyShieldBashPool =
+        "StrengthOfTheWardHolyShieldBashPool";
+    private const string _strengthOfTheWardHolyShieldBashKnightMechanics =
+        "StrengthOfTheWardHolyShieldBashPoolKnightMechanics";
+    private const float _strengthOfTheWardHolyShieldBashCloseKnightsCoordinate = 7;
+
     public static MechanicData GetMechanicData() {
       MechanicData mechanicData = new MechanicData();
       mechanicData.referenceMechanicProperties = new Dictionary<string, MechanicProperties>();
@@ -220,18 +227,22 @@ namespace Pantheon.Mechanics {
                     // new SpawnMechanicEvent() {
                     //   referenceMechanicName = _strengthOfTheWardLightningStorm,
                     // },
-                    // new WaitEvent() {
-                    //   timeToWait = _strengthOfTheWardAscalonsMercyConcealedBeforeStart,
-                    // },
-                    // new SpawnMechanicEvent() {
-                    //   referenceMechanicName = _ascalonsMercyConcealed,
-                    // },
-                    // new WaitEvent() {
-                    //   timeToWait = _strengthOfTheWardDimensionalCollapseBeforeStart,
-                    // },
-                    // new SpawnMechanicEvent() {
-                    //   referenceMechanicName = _strengthOfTheWardDimensionalCollapse,
-                    // },
+                    new SpawnMechanicEvent() {
+                      referenceMechanicName = _strengthOfTheWardHolyShieldBash,
+                      rotation = 90,
+                    },
+                    new WaitEvent() {
+                      timeToWait = _strengthOfTheWardAscalonsMercyConcealedBeforeStart,
+                    },
+                    new SpawnMechanicEvent() {
+                      referenceMechanicName = _ascalonsMercyConcealed,
+                    },
+                    new WaitEvent() {
+                      timeToWait = _strengthOfTheWardDimensionalCollapseBeforeStart,
+                    },
+                    new SpawnMechanicEvent() {
+                      referenceMechanicName = _strengthOfTheWardDimensionalCollapse,
+                    },
                     new SpawnMechanicEvent() {
                       referenceMechanicName = _strengthOfTheWardTheDragonsRage,
                     },
@@ -488,6 +499,59 @@ namespace Pantheon.Mechanics {
                           timeToWait = _strengthOfTheWardTheDragonsRageSkywardLeapEffectDuration,
                         },
                       },
+                },
+          };
+
+      mechanicData.referenceMechanicProperties[_strengthOfTheWardHolyShieldBash] =
+          new MechanicProperties() {
+            visible = false,
+            mechanic =
+                new ExecuteMultipleEvents() {
+                  events =
+                      new List<MechanicEvent>() {
+                        new SpawnEnemy() {
+                          enemyName = "Ser Adelphel",
+                          textureFilePath = "Mechanics/Resources/Knight.png",
+                          maxHp = 1,
+                          colorHtml = "#000000",
+                          isTargetable = false,
+                          visualPosition = new Vector3(0, 2, 0),
+                          visualScale = new Vector3(4, 4, 4),
+                          position =
+                              new Vector2(_strengthOfTheWardHolyShieldBashCloseKnightsCoordinate,
+                                          -_strengthOfTheWardHolyShieldBashCloseKnightsCoordinate),
+                          referenceMechanicName = _strengthOfTheWardHolyShieldBashKnightMechanics,
+                          isPositionRelative = true,
+                          isRotationRelative = true,
+                        },
+                        new SpawnEnemy() {
+                          enemyName = "Ser Janlenoux",
+                          textureFilePath = "Mechanics/Resources/Knight.png",
+                          maxHp = 1,
+                          colorHtml = "#000000",
+                          isTargetable = false,
+                          visualPosition = new Vector3(0, 2, 0),
+                          visualScale = new Vector3(4, 4, 4),
+                          position =
+                              new Vector2(-_strengthOfTheWardHolyShieldBashCloseKnightsCoordinate,
+                                          -_strengthOfTheWardHolyShieldBashCloseKnightsCoordinate),
+                          referenceMechanicName = _strengthOfTheWardHolyShieldBashKnightMechanics,
+                          isPositionRelative = true,
+                          isRotationRelative = true,
+                        },
+                        new WaitEvent() {
+                          timeToWait = float.PositiveInfinity,
+                        },
+                      },
+                },
+          };
+
+      mechanicData.referenceMechanicProperties[_strengthOfTheWardHolyShieldBashKnightMechanics] =
+          new MechanicProperties() {
+            visible = false,
+            mechanic =
+                new WaitEvent() {
+                  timeToWait = float.PositiveInfinity,
                 },
           };
 

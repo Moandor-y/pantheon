@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Collections.ObjectModel;
+using Unity.Netcode;
 
 namespace Pantheon {
   public class GlobalContext : Singleton<GlobalContext> {
@@ -17,6 +18,8 @@ namespace Pantheon {
     public NetworkPlayer LocalPlayer {
       get { return _localPlayer; }
     }
+
+    public GameObject PlayerPrefab;
 
     public event Action<NetworkPlayer> OnPlayerAdded;
     public event Action<NetworkPlayer> OnPlayerRemoved;
@@ -51,6 +54,13 @@ namespace Pantheon {
         _localPlayer = null;
       }
       OnPlayerRemoved?.Invoke(player);
+    }
+
+    public NetworkPlayer SpawnAiPlayer() {
+      var player = Instantiate(PlayerPrefab).GetComponent<NetworkPlayer>();
+      player.gameObject.AddComponent<AutoPilot>();
+      player.GetComponent<NetworkObject>().Spawn(true);
+      return player;
     }
   }
 }

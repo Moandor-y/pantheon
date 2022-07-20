@@ -139,6 +139,27 @@
         "events": [
           {
             "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardHolyShieldBash",
+            "rotation": 90.0
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 8.066667
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "AscalonsMercyConcealed"
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 5.0333333
+          },
+          {
+            "$type": "SpawnMechanicEvent",
+            "referenceMechanicName": "StrengthOfTheWardDimensionalCollapse"
+          },
+          {
+            "$type": "SpawnMechanicEvent",
             "referenceMechanicName": "StrengthOfTheWardTheDragonsRage"
           }
         ]
@@ -614,7 +635,7 @@
             "targetingScheme": {
               "$type": "TargetSpecificPlayerIdsByClass",
               "targetIds": [
-                3,
+                0,
                 1,
                 2
               ],
@@ -688,6 +709,73 @@
             "timeToWait": 0.5
           }
         ]
+      }
+    },
+    "StrengthOfTheWardHolyShieldBash": {
+      "visible": false,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "SpawnEnemy",
+            "enemyName": "Ser Adelphel",
+            "textureFilePath": "Mechanics/Resources/Knight.png",
+            "colorHtml": "#000000",
+            "maxHp": 1,
+            "isPositionRelative": true,
+            "isRotationRelative": true,
+            "visualPosition": {
+              "x": 0.0,
+              "y": 2.0,
+              "z": 0.0
+            },
+            "visualScale": {
+              "x": 4.0,
+              "y": 4.0,
+              "z": 4.0
+            },
+            "referenceMechanicName": "StrengthOfTheWardHolyShieldBashPoolKnightMechanics",
+            "position": {
+              "x": 7.0,
+              "y": -7.0
+            }
+          },
+          {
+            "$type": "SpawnEnemy",
+            "enemyName": "Ser Janlenoux",
+            "textureFilePath": "Mechanics/Resources/Knight.png",
+            "colorHtml": "#000000",
+            "maxHp": 1,
+            "isPositionRelative": true,
+            "isRotationRelative": true,
+            "visualPosition": {
+              "x": 0.0,
+              "y": 2.0,
+              "z": 0.0
+            },
+            "visualScale": {
+              "x": 4.0,
+              "y": 4.0,
+              "z": 4.0
+            },
+            "referenceMechanicName": "StrengthOfTheWardHolyShieldBashPoolKnightMechanics",
+            "position": {
+              "x": -7.0,
+              "y": -7.0
+            }
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": "Infinity"
+          }
+        ]
+      }
+    },
+    "StrengthOfTheWardHolyShieldBashPoolKnightMechanics": {
+      "visible": false,
+      "mechanic": {
+        "$type": "WaitEvent",
+        "timeToWait": "Infinity"
       }
     }
   },

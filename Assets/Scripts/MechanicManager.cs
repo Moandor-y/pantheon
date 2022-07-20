@@ -183,18 +183,29 @@ namespace Pantheon {
       int enemyId = _nextEnemyId;
       ++_nextEnemyId;
 
+      Vector2 position = spawnEnemy.position;
+      if (spawnEnemy.isRotationRelative) {
+        position =
+            RotateClockwise(position, -Vector2.SignedAngle(Vector2.up, mechanicContext.Forward));
+      }
+      if (spawnEnemy.isPositionRelative) {
+        position += mechanicContext.Position;
+      }
+
       EnemyController enemy = Instantiate(_enemyPrefab).GetComponent<EnemyController>();
       enemy.GetComponent<NetworkObject>().Spawn(true);
       enemy.SetIdServerRpc(enemyId);
       enemy.transform.localScale = spawnEnemy.visualScale;
+      enemy.transform.position = new Vector3(position.x, 0, position.y);
       enemy.SetTexturePathServerRpc(spawnEnemy.textureFilePath);
       enemy.SetNameServerRpc(spawnEnemy.enemyName);
 
       MechanicContext childContext = InheritContext(mechanicContext);
       childContext.Source = enemy;
-      yield return Execute(
-          _mechanicData.referenceMechanicProperties[spawnEnemy.referenceMechanicName],
-          childContext);
+      StartCoroutine(
+          Execute(_mechanicData.referenceMechanicProperties[spawnEnemy.referenceMechanicName],
+                  childContext));
+      yield break;
     }
 
     private IEnumerator Execute(XivSimParser.StartCastBar startCastBar,
@@ -229,6 +240,7 @@ namespace Pantheon {
           childContext.Position += mechanicContext.Position;
         }
 
+        Assert.IsNotNull(spawnTargetedEvents.referenceMechanicName);
         _coroutines.Add(StartCoroutine(Execute(
             _mechanicData.referenceMechanicProperties[spawnTargetedEvents.referenceMechanicName],
             childContext)));

@@ -1,0 +1,123 @@
+{
+  "referenceMechanicProperties": {
+    "MechanicArenaBoundary": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 100.0,
+        "y": 360.0,
+        "z": 23.415,
+        "w": 0.0
+      },
+      "visible": true,
+      "persistentTickInterval": 0.2,
+      "persistentMechanic": {
+        "$type": "ApplyEffectToPlayers",
+        "affectLivingOnly": true,
+        "effect": {
+          "$type": "DamageEffect",
+          "damageAmount": 9999999.0,
+          "maxStackAmount": 1
+        }
+      }
+    },
+    "TargetedAoe": {
+      "collisionShape": "Round",
+      "collisionShapeParams": {
+        "x": 1.0,
+        "y": 360.0,
+        "z": 0.0,
+        "w": 0.0
+      },
+      "visible": true,
+      "mechanic": {
+        "$type": "ApplyEffectToPlayers",
+        "affectLivingOnly": true,
+        "effects": [
+          {
+            "$type": "DamageEffect",
+            "damageType": "Fire",
+            "damageAmount": 1.0,
+            "maxStackAmount": 1
+          },
+          {
+            "$type": "ApplyStatusEffect",
+            "referenceStatusName": "Vuln"
+          }
+        ]
+      }
+    },
+    "TargetTanks": {
+      "visible": false,
+      "mechanic": {
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 1.0
+          },
+          {
+            "$type": "ReshufflePlayerIds"
+          },
+          {
+            "$type": "SpawnTargetedEvents",
+            "targetingScheme": {
+              "$type": "TargetSpecificPlayerIdsByClass",
+              "targetIds": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "targetLivingOnly": true
+            },
+            "referenceMechanicName": "TargetedAoe",
+            "spawnOnTarget": true
+          }
+        ]
+      }
+    }
+  },
+  "referenceTetherProperties": {},
+  "mechanicPools": {},
+  "referenceStatusProperties": {
+    "Vuln": {
+      "$type": "DamageModifier",
+      "damageMultiplier": 100000.0,
+      "damageType": "Fire",
+      "statusName": "Vuln",
+      "duration": 3.0,
+      "spreadDistance": -1.0
+    }
+  },
+  "mechanicEvents": [
+    {
+      "$type": "SpawnVisualObject",
+      "textureFilePath": "Mechanics/Resources/ArenaCircle.png",
+      "relativePosition": {
+        "x": 0.0,
+        "y": -0.001,
+        "z": 0.0
+      },
+      "eulerAngles": {
+        "x": 90.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 46.83,
+        "y": 46.83,
+        "z": 1.0
+      },
+      "colorHtml": "#000000",
+      "visualDuration": "Infinity"
+    },
+    {
+      "$type": "SpawnMechanicEvent",
+      "referenceMechanicName": "TargetTanks"
+    }
+  ],
+  "defaultHealth": 50000
+}
