@@ -7,7 +7,7 @@ using Unity.Netcode;
 
 namespace Pantheon {
   public class GlobalContext : Singleton<GlobalContext> {
-    public const float MaxMoveSpeed = 6;
+    public const float MaxPlayerMoveSpeed = 6;
 
     public string MechanicPath { get; set; }
 
@@ -19,14 +19,15 @@ namespace Pantheon {
       get { return _localPlayer; }
     }
 
-    public GameObject PlayerPrefab;
-
     public event Action<NetworkPlayer> OnPlayerAdded;
     public event Action<NetworkPlayer> OnPlayerRemoved;
 
     private Dictionary<int, EnemyController> _enemies = new Dictionary<int, EnemyController>();
     private List<NetworkPlayer> _players = new List<NetworkPlayer>();
     private NetworkPlayer _localPlayer;
+
+    [SerializeField]
+    private GameObject _playerPrefab;
 
     public EnemyController GetEnemyById(int id) {
       return _enemies.GetValueOrDefault(id, null);
@@ -57,7 +58,7 @@ namespace Pantheon {
     }
 
     public NetworkPlayer SpawnAiPlayer() {
-      var player = Instantiate(PlayerPrefab).GetComponent<NetworkPlayer>();
+      var player = Instantiate(_playerPrefab).GetComponent<NetworkPlayer>();
       player.gameObject.AddComponent<AutoPilot>();
       player.GetComponent<NetworkObject>().Spawn(true);
       return player;

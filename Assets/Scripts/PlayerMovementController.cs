@@ -75,6 +75,6 @@ namespace Pantheon {
 
     private const float _moveAxisThreashold = 0.5f;
     private const float _moveStartingDuration = 0.2f;
-    private const float _maxMoveSpeed = GlobalContext.MaxMoveSpeed;
+    private const float _maxMoveSpeed = GlobalContext.MaxPlayerMoveSpeed;
   }
 }

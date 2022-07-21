@@ -154,6 +154,13 @@ namespace Pantheon {
       public string referenceMechanicName;
     }
 
+    public class SetEnemyAggro : MechanicEvent {
+      public TargetingScheme targetingScheme;
+
+      [DefaultValue(1)]
+      public int aggroAmount = 1;
+    }
+
     public abstract class MechanicEffect {}
 
     public class DamageEffect : MechanicEffect {

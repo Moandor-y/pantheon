@@ -6,7 +6,8 @@ using System;
 namespace Pantheon {
   [DisallowMultipleComponent]
   public class AutoPilot : MonoBehaviour {
-    private const float _minDistance = 0.01f;
+    public float TargetDistance;
+    public float Speed = GlobalContext.MaxPlayerMoveSpeed;
 
     private Vector3 _destination;
     private bool _moving = false;
@@ -16,18 +17,24 @@ namespace Pantheon {
       _moving = true;
     }
 
+    public void Face(Vector2 forward) {
+      if (forward != Vector2.zero) {
+        transform.rotation = Quaternion.LookRotation(new Vector3(forward.x, 0, forward.y));
+      }
+    }
+
     private void Update() {
       if (!_moving) {
         return;
       }
 
       float distance = Vector3.Distance(_destination, transform.position);
-      if (distance < _minDistance) {
+      if (distance < TargetDistance) {
         _moving = false;
         return;
       }
 
-      transform.Translate(Mathf.Min(distance, GlobalContext.MaxMoveSpeed * Time.deltaTime) *
+      transform.Translate(Mathf.Min(distance - TargetDistance, Speed * Time.deltaTime) *
                               (_destination - transform.position).normalized,
                           Space.World);
     }

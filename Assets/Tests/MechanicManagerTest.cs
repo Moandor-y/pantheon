@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using System.Linq;
 using System;
 
-namespace Pantheon {
+namespace Pantheon.Test {
 
   public class MechanicManagerTest {
     private NetworkPlayer _localPlayer;
@@ -107,6 +107,38 @@ namespace Pantheon {
       yield return new WaitForSeconds(2);
       Assert.AreEqual(5, GlobalContext.Instance.Players.Count(player => player.Health == 49999));
       Assert.AreEqual(1, GlobalContext.Instance.Players.Count(player => player.Health == -50001));
+    }
+
+    [UnityTest]
+    public IEnumerator EnemyDirectChildMechanicsFollowMovement() {
+      _localPlayer.PlayerClass = NetworkPlayer.Class.Healer;
+      var tank = GlobalContext.Instance.SpawnAiPlayer();
+      tank.PlayerClass = NetworkPlayer.Class.Tank;
+      var tankAutoPilot = tank.GetComponent<AutoPilot>();
+      yield return null;
+      StartMechanic("EnemyDirectChildMechanicsFollowMovement");
+      tankAutoPilot.Go(new Vector2(0, 20));
+      yield return new WaitForSeconds(5);
+      tankAutoPilot.Go(new Vector2(20, 20));
+      yield return new WaitForSeconds(7);
+      Assert.AreEqual(50000, _localPlayer.Health);
+      Assert.AreEqual(49999, tank.Health);
+    }
+
+    [UnityTest]
+    public IEnumerator EnemyIndirectChildMechanicsDoNotFollowMovement() {
+      _localPlayer.PlayerClass = NetworkPlayer.Class.Healer;
+      var tank = GlobalContext.Instance.SpawnAiPlayer();
+      tank.PlayerClass = NetworkPlayer.Class.Tank;
+      var tankAutoPilot = tank.GetComponent<AutoPilot>();
+      yield return null;
+      StartMechanic("EnemyIndirectChildMechanicsDoNotFollowMovement");
+      tankAutoPilot.Go(new Vector2(0, 20));
+      yield return new WaitForSeconds(5);
+      tankAutoPilot.Go(new Vector2(20, 20));
+      yield return new WaitForSeconds(7);
+      Assert.AreEqual(49998, _localPlayer.Health);
+      Assert.AreEqual(50000, tank.Health);
     }
 
     private void StartMechanic(string name) {

@@ -116,7 +116,7 @@ namespace Pantheon.Mechanics {
               textureFilePath = "Mechanics/Resources/Thordan.png",
               colorHtml = "#000000",
               maxHp = 1000000,
-              baseMoveSpeed = 2,
+              baseMoveSpeed = 6,
               hitboxSize = 3,
               isTargetable = true,
               visualPosition = new Vector3(0, 2, 0),
@@ -126,10 +126,19 @@ namespace Pantheon.Mechanics {
             },
       };
       mechanicData.referenceMechanicProperties[_thordanMechanics] = new MechanicProperties() {
+        visible = true,
+        collisionShape = CollisionShape.Round,
+        collisionShapeParams = new Vector4(1, 360, 0, 0),
         mechanic =
             new ExecuteMultipleEvents() {
               events =
                   new List<MechanicEvent>() {
+                    new SetEnemyAggro() {
+                      targetingScheme =
+                          new TargetSpecificPlayerIds {
+                            targetIds = new List<int>() { 0 },
+                          },
+                    },
                     // new WaitEvent() {
                     //   timeToWait = 8.4333333333333333333333333333333f,
                     // },
@@ -139,9 +148,9 @@ namespace Pantheon.Mechanics {
                     // new WaitEvent() {
                     //   timeToWait = 16.5f,
                     // },
-                    new SpawnMechanicEvent() {
-                      referenceMechanicName = _strengthOfTheWard,
-                    },
+                    // new SpawnMechanicEvent() {
+                    //   referenceMechanicName = _strengthOfTheWard,
+                    // },
                     new WaitEvent() {
                       timeToWait = float.PositiveInfinity,
                     },
@@ -161,6 +170,7 @@ namespace Pantheon.Mechanics {
                     new SpawnTargetedEvents() {
                       referenceMechanicName = _ascalonsMercyConcealedTargeted,
                       targetingScheme = new TargetAllPlayers(),
+                      isPositionRelative = true,
                     },
                   },
             },

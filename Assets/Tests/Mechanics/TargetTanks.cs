@@ -6,35 +6,13 @@ using static Pantheon.XivSimParser;
 
 namespace Pantheon.Test.Mechanics {
   public static class TargetTanks {
-    private const float _arenaRadius = 46.83f / 2;
-    private const string _mechanicArenaBoundary = "MechanicArenaBoundary";
-    private const string _spawnBoss = "SpawnBoss";
-    private const string _targetTanks = "TargetTanks";
     private const string _targetedAoe = "TargetedAoe";
     private const string _statusVuln = "Vuln";
     private const float _castDuration = 1;
     private const string _damageType = "Fire";
 
     public static MechanicData GetMechanicData() {
-      MechanicData mechanicData = new MechanicData();
-      mechanicData.referenceMechanicProperties = new Dictionary<string, MechanicProperties>();
-      mechanicData.referenceTetherProperties = new Dictionary<string, TetherProperties>();
-      mechanicData.mechanicPools = new Dictionary<string, List<MechanicEvent>>();
-      mechanicData.referenceStatusProperties = new Dictionary<string, StatusEffectData>();
-      mechanicData.defaultHealth = 50000;
-      mechanicData.referenceMechanicProperties[_mechanicArenaBoundary] = new MechanicProperties() {
-        visible = true,
-        collisionShape = CollisionShape.Round,
-        collisionShapeParams = new Vector4(100, 360, _arenaRadius, 0),
-        persistentTickInterval = 0.2f,
-        persistentMechanic =
-            new ApplyEffectToPlayers() {
-              effect =
-                  new DamageEffect() {
-                    damageAmount = 9999999,
-                  },
-            },
-      };
+      MechanicData mechanicData = Common.BaseMechanicData();
       mechanicData.referenceMechanicProperties[_targetedAoe] = new MechanicProperties() {
         visible = true,
         collisionShape = CollisionShape.Round,
@@ -53,7 +31,7 @@ namespace Pantheon.Test.Mechanics {
                   },
             },
       };
-      mechanicData.referenceMechanicProperties[_targetTanks] = new MechanicProperties() {
+      mechanicData.referenceMechanicProperties[Common.BossMechanic] = new MechanicProperties() {
         visible = false,
         mechanic =
             new ExecuteMultipleEvents() {
@@ -83,18 +61,6 @@ namespace Pantheon.Test.Mechanics {
                     },
                   },
             },
-      };
-      mechanicData.mechanicEvents = new List<MechanicEvent>() {
-        new SpawnVisualObject() {
-          textureFilePath = "Mechanics/Resources/ArenaCircle.png",
-          relativePosition = new Vector3(0, -0.001f, 0),
-          eulerAngles = new Vector3(90, 0, 0),
-          scale = new Vector3(_arenaRadius * 2, _arenaRadius * 2, 1),
-          visualDuration = float.PositiveInfinity,
-        },
-        new SpawnMechanicEvent() {
-          referenceMechanicName = _targetTanks,
-        },
       };
       mechanicData.referenceStatusProperties[_statusVuln] = new DamageModifier() {
         damageMultiplier = 100000,

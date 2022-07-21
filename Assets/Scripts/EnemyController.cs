@@ -7,8 +7,22 @@ using System;
 
 namespace Pantheon {
   public class EnemyController : NetworkBehaviour {
+    public NetworkPlayer Aggro { set; private get; }
+
+    public float HitboxSize { set; private get; }
+
+    public float Speed {
+      set { _autoPilot.Speed = value; }
+    }
+
     [SerializeField]
     private Renderer _renderer;
+
+    [SerializeField]
+    private Renderer _rendererBack;
+
+    [SerializeField]
+    private AutoPilot _autoPilot;
 
     private EnemyListItem _enemyListItem;
 
@@ -53,6 +67,7 @@ namespace Pantheon {
       Texture2D texture = new Texture2D(2, 2, TextureFormat.ARGB32, false);
       texture.LoadImage(File.ReadAllBytes(path));
       _renderer.material.mainTexture = texture;
+      _rendererBack.material.mainTexture = texture;
     }
 
     [ClientRpc]
@@ -76,6 +91,15 @@ namespace Pantheon {
       }
 
       _castCoroutine = StartCoroutine(_enemyListItem.Cast(name, duration));
+    }
+
+    private void Update() {
+      if (Aggro != null) {
+        _autoPilot.TargetDistance = HitboxSize;
+        _autoPilot.Go(new Vector2(Aggro.transform.position.x, Aggro.transform.position.z));
+        Vector3 look = Aggro.transform.position - transform.position;
+        _autoPilot.Face(new Vector2(look.x, look.z));
+      }
     }
   }
 }

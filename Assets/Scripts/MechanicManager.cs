@@ -199,12 +199,16 @@ namespace Pantheon {
       enemy.transform.position = new Vector3(position.x, 0, position.y);
       enemy.SetTexturePathServerRpc(spawnEnemy.textureFilePath);
       enemy.SetNameServerRpc(spawnEnemy.enemyName);
+      enemy.HitboxSize = spawnEnemy.hitboxSize;
+      enemy.Speed = spawnEnemy.baseMoveSpeed;
 
       MechanicContext childContext = InheritContext(mechanicContext);
       childContext.Source = enemy;
-      StartCoroutine(
-          Execute(_mechanicData.referenceMechanicProperties[spawnEnemy.referenceMechanicName],
-                  childContext));
+      childContext.IsAttachedToSource = true;
+
+      _coroutines.Add(StartCoroutine(Execute(
+          _mechanicData.referenceMechanicProperties[spawnEnemy.referenceMechanicName].mechanic,
+          childContext)));
       yield break;
     }
 
@@ -274,6 +278,13 @@ namespace Pantheon {
       if (mechanicProperties.collisionShapeParams.HasValue) {
         UpdateCollision(mechanicContext, mechanicProperties);
       }
+      yield break;
+    }
+
+    private IEnumerator Execute(XivSimParser.SetEnemyAggro setEnemyAggro,
+                                MechanicContext mechanicContext) {
+      mechanicContext.Source.Aggro =
+          setEnemyAggro.targetingScheme.TargetPlayers(_players.AsReadOnly())[0];
       yield break;
     }
 
@@ -427,11 +438,25 @@ namespace Pantheon {
       public MechanicContext Parent;
       public bool Visible = true;
       public EnemyController Source;
-      public Vector2 Position;
       public ICollision Collision;
       public NetworkPlayer Target;
       public bool IsTargeted;
       public Vector2 Forward = Vector2.up;
+      public bool IsAttachedToSource = false;
+
+      public Vector2 Position {
+        get {
+          if (IsAttachedToSource) {
+            return new Vector2(Source.transform.position.x, Source.transform.position.z);
+          } else {
+            return _position;
+          }
+        }
+
+        set { _position = value; }
+      }
+
+      private Vector2 _position;
     }
 
     private interface ICollision {
