@@ -141,6 +141,14 @@ namespace Pantheon.Test {
       Assert.AreEqual(50000, tank.Health);
     }
 
+    [UnityTest]
+    public IEnumerator EnemyDoesNotMoveWhileCasting() {
+      StartMechanic("EnemyDoesNotMoveWhileCasting");
+      _localAutoPilot.Go(new Vector2(0, -20));
+      yield return new WaitForSeconds(7);
+      Assert.AreEqual(50000, _localPlayer.Health);
+    }
+
     private void StartMechanic(string name) {
       File.WriteAllText(
           $"Mechanics/Tests/{name}.json",

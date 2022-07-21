@@ -288,6 +288,16 @@ namespace Pantheon {
       yield break;
     }
 
+    private IEnumerator Execute(XivSimParser.SetEnemyMovement setEnemyMovement,
+                                MechanicContext mechanicContext) {
+      throw new NotImplementedException();
+    }
+
+    private IEnumerator Execute(XivSimParser.SetEnemyBaseSpeed setEnemyBaseSpeed,
+                                MechanicContext mechanicContext) {
+      throw new NotImplementedException();
+    }
+
     private void ApplyEffect(XivSimParser.ApplyEffectToPlayers applyEffectToPlayers,
                              List<NetworkPlayer> players) {
       List<XivSimParser.MechanicEffect> effects = new List<XivSimParser.MechanicEffect>();

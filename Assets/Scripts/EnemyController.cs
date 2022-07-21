@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 using System.IO;
 using System;
+using UnityEngine.Assertions;
 
 namespace Pantheon {
   public class EnemyController : NetworkBehaviour {
@@ -26,9 +27,11 @@ namespace Pantheon {
 
     private EnemyListItem _enemyListItem;
 
-    private Coroutine _castCoroutine;
+    private Coroutine _castClientCoroutine;
+    private Coroutine _castServerCoroutine;
 
     private int _id;
+    private bool _isCasting;
 
     public override void OnDestroy() {
       if (_enemyListItem != null) {
@@ -41,9 +44,14 @@ namespace Pantheon {
     }
 
     public void Cast(string name, float duration) {
-      if (!IsServer) {
-        throw new InvalidOperationException();
+      Assert.IsTrue(IsServer);
+
+      if (_castServerCoroutine != null) {
+        StopCoroutine(_castServerCoroutine);
       }
+      _isCasting = true;
+      _castServerCoroutine = StartCoroutine(StopCastInSeconds(duration));
+
       CastClientRpc(name, duration);
     }
 
@@ -86,20 +94,25 @@ namespace Pantheon {
 
     [ClientRpc]
     private void CastClientRpc(string name, float duration) {
-      if (_castCoroutine != null) {
-        StopCoroutine(_castCoroutine);
+      if (_castClientCoroutine != null) {
+        StopCoroutine(_castClientCoroutine);
       }
 
-      _castCoroutine = StartCoroutine(_enemyListItem.Cast(name, duration));
+      _castClientCoroutine = StartCoroutine(_enemyListItem.Cast(name, duration));
     }
 
     private void Update() {
-      if (Aggro != null) {
+      if (Aggro != null && !_isCasting) {
         _autoPilot.TargetDistance = HitboxSize;
         _autoPilot.Go(new Vector2(Aggro.transform.position.x, Aggro.transform.position.z));
         Vector3 look = Aggro.transform.position - transform.position;
         _autoPilot.Face(new Vector2(look.x, look.z));
       }
+    }
+
+    private IEnumerator StopCastInSeconds(float seconds) {
+      yield return new WaitForSeconds(seconds);
+      _isCasting = false;
     }
   }
 }

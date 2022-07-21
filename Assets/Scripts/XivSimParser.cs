@@ -161,6 +161,18 @@ namespace Pantheon {
       public int aggroAmount = 1;
     }
 
+    public class SetEnemyMovement : MechanicEvent {
+      [JsonConverter(typeof(Vector2Converter))]
+      public Vector2 position;
+
+      public TargetingScheme moveToTarget;
+      public float movementTime;
+    }
+
+    public class SetEnemyBaseSpeed : MechanicEvent {
+      public float baseMoveSpeed;
+    }
+
     public abstract class MechanicEffect {}
 
     public class DamageEffect : MechanicEffect {

@@ -11,6 +11,7 @@ namespace Pantheon.Mechanics {
     private const string _mechanicArenaBoundary = "MechanicArenaBoundary";
 
     private const float _arenaRadius = 46.83f / 2;
+    private const float _bossBaseSpeed = 10;
 
     private const string _statusLightningStormVuln = "LightningStormVuln";
     private const string _statusLightningStormVulnName = "Lightning Resistance Down II";
@@ -116,7 +117,7 @@ namespace Pantheon.Mechanics {
               textureFilePath = "Mechanics/Resources/Thordan.png",
               colorHtml = "#000000",
               maxHp = 1000000,
-              baseMoveSpeed = 6,
+              baseMoveSpeed = _bossBaseSpeed,
               hitboxSize = 3,
               isTargetable = true,
               visualPosition = new Vector3(0, 2, 0),
@@ -139,18 +140,32 @@ namespace Pantheon.Mechanics {
                             targetIds = new List<int>() { 0 },
                           },
                     },
+                    new WaitEvent() {
+                      timeToWait = 2,
+                    },
+                    new SpawnMechanicEvent() {
+                      referenceMechanicName = _ascalonsMercyConcealed,
+                      isPositionRelative = true,
+                    },
                     // new WaitEvent() {
                     //   timeToWait = 8.4333333333333333333333333333333f,
                     // },
                     // new SpawnMechanicEvent() {
                     //   referenceMechanicName = _ascalonsMercyConcealed,
                     // },
-                    // new WaitEvent() {
-                    //   timeToWait = 16.5f,
-                    // },
-                    // new SpawnMechanicEvent() {
-                    //   referenceMechanicName = _strengthOfTheWard,
-                    // },
+                    new WaitEvent() {
+                      timeToWait = 16.5f,
+                    },
+                    new SetEnemyMovement() {
+                      position = new Vector2(0, 0),
+                      movementTime = 0.1f,
+                    },
+                    new SetEnemyBaseSpeed() {
+                      baseMoveSpeed = 0,
+                    },
+                    new SpawnMechanicEvent() {
+                      referenceMechanicName = _strengthOfTheWard,
+                    },
                     new WaitEvent() {
                       timeToWait = float.PositiveInfinity,
                     },
@@ -171,6 +186,18 @@ namespace Pantheon.Mechanics {
                       referenceMechanicName = _ascalonsMercyConcealedTargeted,
                       targetingScheme = new TargetAllPlayers(),
                       isPositionRelative = true,
+                    },
+                    new WaitEvent() {
+                      timeToWait = _ascalonsMercyConcealedCastDuration,
+                    },
+                    new SetEnemyBaseSpeed() {
+                      baseMoveSpeed = 0,
+                    },
+                    new WaitEvent() {
+                      timeToWait = _ascalonsMercyConcealedDamageDelay,
+                    },
+                    new SetEnemyBaseSpeed() {
+                      baseMoveSpeed = _bossBaseSpeed,
                     },
                   },
             },
