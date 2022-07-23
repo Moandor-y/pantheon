@@ -83,6 +83,8 @@ namespace Pantheon.Mechanics {
         "StrengthOfTheWardHolyShieldBashPool";
     private const string _strengthOfTheWardHolyShieldBashKnightMechanics =
         "StrengthOfTheWardHolyShieldBashPoolKnightMechanics";
+    private const string _strengthOfTheWardHolyShieldBashTether =
+        "StrengthOfTheWardHolyShieldBashTether";
     private const float _strengthOfTheWardHolyShieldBashCloseKnightsCoordinate = 7;
 
     public static MechanicData GetMechanicData() {
@@ -140,22 +142,29 @@ namespace Pantheon.Mechanics {
                             targetIds = new List<int>() { 0 },
                           },
                     },
-                    new WaitEvent() {
-                      timeToWait = 2,
-                    },
-                    new SpawnMechanicEvent() {
-                      referenceMechanicName = _ascalonsMercyConcealed,
-                      isPositionRelative = true,
-                    },
                     // new WaitEvent() {
                     //   timeToWait = 8.4333333333333333333333333333333f,
                     // },
                     // new SpawnMechanicEvent() {
                     //   referenceMechanicName = _ascalonsMercyConcealed,
+                    //   isPositionRelative = true,
                     // },
-                    new WaitEvent() {
-                      timeToWait = 16.5f,
-                    },
+                    // new WaitEvent() {
+                    //   timeToWait = _ascalonsMercyConcealedCastDuration,
+                    // },
+                    // new SetEnemyBaseSpeed() {
+                    //   baseMoveSpeed = 0,
+                    // },
+                    // new WaitEvent() {
+                    //   timeToWait = _ascalonsMercyConcealedDamageDelay,
+                    // },
+                    // new SetEnemyBaseSpeed() {
+                    //   baseMoveSpeed = _bossBaseSpeed,
+                    // },
+                    // new WaitEvent() {
+                    //   timeToWait = 16.5f - _ascalonsMercyConcealedCastDuration -
+                    //   _ascalonsMercyConcealedDamageDelay,
+                    // },
                     new SetEnemyMovement() {
                       position = new Vector2(0, 0),
                       movementTime = 0.1f,
@@ -186,18 +195,6 @@ namespace Pantheon.Mechanics {
                       referenceMechanicName = _ascalonsMercyConcealedTargeted,
                       targetingScheme = new TargetAllPlayers(),
                       isPositionRelative = true,
-                    },
-                    new WaitEvent() {
-                      timeToWait = _ascalonsMercyConcealedCastDuration,
-                    },
-                    new SetEnemyBaseSpeed() {
-                      baseMoveSpeed = 0,
-                    },
-                    new WaitEvent() {
-                      timeToWait = _ascalonsMercyConcealedDamageDelay,
-                    },
-                    new SetEnemyBaseSpeed() {
-                      baseMoveSpeed = _bossBaseSpeed,
                     },
                   },
             },
@@ -552,6 +549,7 @@ namespace Pantheon.Mechanics {
                           maxHp = 1,
                           colorHtml = "#000000",
                           isTargetable = false,
+                          isVisible = false,
                           visualPosition = new Vector3(0, 2, 0),
                           visualScale = new Vector3(4, 4, 4),
                           position =
@@ -567,6 +565,7 @@ namespace Pantheon.Mechanics {
                           maxHp = 1,
                           colorHtml = "#000000",
                           isTargetable = false,
+                          isVisible = false,
                           visualPosition = new Vector3(0, 2, 0),
                           visualScale = new Vector3(4, 4, 4),
                           position =
@@ -587,8 +586,27 @@ namespace Pantheon.Mechanics {
           new MechanicProperties() {
             visible = false,
             mechanic =
-                new WaitEvent() {
-                  timeToWait = float.PositiveInfinity,
+                new ExecuteMultipleEvents() {
+                  events =
+                      new List<MechanicEvent>() {
+                        new WaitEvent() {
+                          timeToWait = 2,
+                        },
+                        new SpawnTethersToPlayers() {
+                          targetingScheme =
+                              new TargetSpecificPlayerIds() {
+                                targetIds =
+                                    new List<int>() {
+                                      0,
+                                    },
+                              },
+                          referenceTetherName = _strengthOfTheWardHolyShieldBashTether,
+                          tetherOffset = new Vector3(0, 1, 0),
+                        },
+                        new WaitEvent() {
+                          timeToWait = float.PositiveInfinity,
+                        },
+                      },
                 },
           };
 
@@ -652,6 +670,17 @@ namespace Pantheon.Mechanics {
             statusIconPath = "Mechanics/Resources/PhysicalVuln.png",
           } },
       };
+
+      mechanicData.referenceTetherProperties = new Dictionary<string, TetherProperties>();
+
+      mechanicData.referenceTetherProperties[_strengthOfTheWardHolyShieldBashTether] =
+          new TetherProperties() {
+            tetherDuration = float.PositiveInfinity,
+            retargetRandomPlayerOnDeath = true,
+            oneTetherPerPlayer = true,
+            interceptMechanic = new SwitchTetheredPlayer(),
+            colorHtml = "#00ff60",
+          };
 
       return mechanicData;
     }

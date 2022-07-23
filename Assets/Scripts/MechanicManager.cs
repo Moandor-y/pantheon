@@ -290,12 +290,29 @@ namespace Pantheon {
 
     private IEnumerator Execute(XivSimParser.SetEnemyMovement setEnemyMovement,
                                 MechanicContext mechanicContext) {
-      throw new NotImplementedException();
+      Vector2 destination;
+      if (setEnemyMovement.moveToTarget != null) {
+        NetworkPlayer target =
+            setEnemyMovement.moveToTarget.TargetPlayers(_players.AsReadOnly())[0];
+        destination = new Vector2(target.transform.position.x, target.transform.position.z);
+      } else {
+        destination = setEnemyMovement.position;
+      }
+      _coroutines.Add(StartCoroutine(
+          mechanicContext.Source.MoveTo(destination, setEnemyMovement.movementTime)));
+      yield break;
     }
 
     private IEnumerator Execute(XivSimParser.SetEnemyBaseSpeed setEnemyBaseSpeed,
                                 MechanicContext mechanicContext) {
-      throw new NotImplementedException();
+      mechanicContext.Source.Speed = setEnemyBaseSpeed.baseMoveSpeed;
+      yield break;
+    }
+
+    private IEnumerator Execute(XivSimParser.SpawnTethersToPlayers spawnTethersToPlayers,
+                                MechanicContext mechanicContext) {
+      // TODO
+      yield break;
     }
 
     private void ApplyEffect(XivSimParser.ApplyEffectToPlayers applyEffectToPlayers,

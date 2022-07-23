@@ -73,19 +73,6 @@
             }
           },
           {
-            "$type": "WaitEvent",
-            "timeToWait": 2.0
-          },
-          {
-            "$type": "SpawnMechanicEvent",
-            "referenceMechanicName": "AscalonsMercyConcealed",
-            "isPositionRelative": true
-          },
-          {
-            "$type": "WaitEvent",
-            "timeToWait": 16.5
-          },
-          {
             "$type": "SetEnemyMovement",
             "movementTime": 0.1
           },
@@ -120,21 +107,6 @@
             },
             "referenceMechanicName": "AscalonsMercyConcealedTargeted",
             "isPositionRelative": true
-          },
-          {
-            "$type": "WaitEvent",
-            "timeToWait": 2.6833334
-          },
-          {
-            "$type": "SetEnemyBaseSpeed"
-          },
-          {
-            "$type": "WaitEvent",
-            "timeToWait": 1.88333333
-          },
-          {
-            "$type": "SetEnemyBaseSpeed",
-            "baseMoveSpeed": 10.0
           }
         ]
       }
@@ -828,9 +800,45 @@
     "StrengthOfTheWardHolyShieldBashPoolKnightMechanics": {
       "visible": false,
       "mechanic": {
-        "$type": "WaitEvent",
-        "timeToWait": "Infinity"
+        "$type": "ExecuteMultipleEvents",
+        "events": [
+          {
+            "$type": "WaitEvent",
+            "timeToWait": 2.0
+          },
+          {
+            "$type": "SpawnTethersToPlayers",
+            "targetingScheme": {
+              "$type": "TargetSpecificPlayerIds",
+              "targetIds": [
+                0
+              ],
+              "targetLivingOnly": true
+            },
+            "referenceTetherName": "StrengthOfTheWardHolyShieldBashTether",
+            "tetherOffset": {
+              "x": 0.0,
+              "y": 1.0,
+              "z": 0.0
+            }
+          },
+          {
+            "$type": "WaitEvent",
+            "timeToWait": "Infinity"
+          }
+        ]
       }
+    }
+  },
+  "referenceTetherProperties": {
+    "StrengthOfTheWardHolyShieldBashTether": {
+      "colorHtml": "#00ff60",
+      "tetherDuration": "Infinity",
+      "interceptMechanic": {
+        "$type": "SwitchTetheredPlayer"
+      },
+      "retargetRandomPlayerOnDeath": true,
+      "oneTetherPerPlayer": true
     }
   },
   "mechanicPools": {

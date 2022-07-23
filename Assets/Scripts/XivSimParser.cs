@@ -173,6 +173,14 @@ namespace Pantheon {
       public float baseMoveSpeed;
     }
 
+    public class SpawnTethersToPlayers : MechanicEvent {
+      public TargetingScheme targetingScheme;
+      public string referenceTetherName;
+
+      [JsonConverter(typeof(Vector3Converter))]
+      public Vector3 tetherOffset;
+    }
+
     public abstract class MechanicEffect {}
 
     public class DamageEffect : MechanicEffect {
@@ -250,7 +258,29 @@ public class TargetAllPlayers : TargetingScheme {
   }
 }
 
-public class TetherProperties {}
+public class TetherProperties {
+  public string colorHtml;
+  public string colorHtml2;
+  public string colorDistanceFunction;
+  public float? tetherDuration;
+  public float? persistentTickInterval;
+  public float? persistentActivationDelay;
+  public float? interceptTickInterval;
+  public float? interceptActivationDelay;
+  public TetherEvent breakMechanic;
+  public TetherEvent persistentMechanic;
+  public TetherEvent interceptMechanic;
+  public bool? breakOnTetherExpired;
+  public bool? retargetRandomPlayerOnDeath;
+  public int? maxInterceptCount;
+  public string tetherTag;
+  public bool? oneTetherPerPlayer;
+  public bool? visible;
+}
+
+public abstract class TetherEvent {}
+
+public class SwitchTetheredPlayer : TetherEvent {}
 
 public enum CollisionShape { Round, Rectangle }
 

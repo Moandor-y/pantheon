@@ -55,6 +55,24 @@ namespace Pantheon {
       CastClientRpc(name, duration);
     }
 
+    public IEnumerator MoveTo(Vector2 destination, float duration) {
+      Assert.IsTrue(IsServer);
+
+      float startTime = Time.time;
+      Vector3 startPosition = transform.position;
+      Vector3 endPosition = new Vector3(destination.x, 0, destination.y);
+      while (true) {
+        transform.position =
+            Vector3.Lerp(startPosition, endPosition, (Time.time - startTime) / duration);
+
+        if (Time.time - startTime > duration) {
+          break;
+        }
+
+        yield return null;
+      }
+    }
+
     [ServerRpc]
     public void SetTexturePathServerRpc(string path) {
       SetTexturePathClientRpc(path);
